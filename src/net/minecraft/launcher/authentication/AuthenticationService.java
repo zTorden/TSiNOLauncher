@@ -12,13 +12,10 @@ public abstract interface AuthenticationService {
 	public static final String STORAGE_KEY_USERNAME = "username";
 	public static final String STORAGE_KEY_REMEMBER_ME = "rememberMe";
 
+	public abstract void addAuthenticationChangedListener(
+			AuthenticationChangedListener paramAuthenticationChangedListener);
+
 	public abstract boolean canLogIn();
-
-	public abstract void logIn() throws AuthenticationException;
-
-	public abstract void logOut();
-
-	public abstract boolean isLoggedIn();
 
 	public abstract boolean canPlayOnline();
 
@@ -26,30 +23,33 @@ public abstract interface AuthenticationService {
 
 	public abstract GameProfile getSelectedProfile();
 
-	public abstract void selectGameProfile(GameProfile paramGameProfile)
-			throws AuthenticationException;
-
-	public abstract void loadFromStorage(Map<String, String> paramMap);
-
-	public abstract Map<String, String> saveForStorage();
-
 	public abstract String getSessionToken();
 
 	public abstract String getUsername();
 
-	public abstract void setUsername(String paramString);
+	public abstract String guessPasswordFromSillyOldFormat(File paramFile);
 
-	public abstract void setPassword(String paramString);
+	public abstract boolean isLoggedIn();
 
-	public abstract void addAuthenticationChangedListener(
-			AuthenticationChangedListener paramAuthenticationChangedListener);
+	public abstract void loadFromStorage(Map<String, String> paramMap);
+
+	public abstract void logIn() throws AuthenticationException;
+
+	public abstract void logOut();
 
 	public abstract void removeAuthenticationChangedListener(
 			AuthenticationChangedListener paramAuthenticationChangedListener);
 
-	public abstract String guessPasswordFromSillyOldFormat(File paramFile);
+	public abstract Map<String, String> saveForStorage();
+
+	public abstract void selectGameProfile(GameProfile paramGameProfile)
+			throws AuthenticationException;
+
+	public abstract void setPassword(String paramString);
 
 	public abstract void setRememberMe(boolean paramBoolean);
+
+	public abstract void setUsername(String paramString);
 
 	public abstract boolean shouldRememberMe();
 }

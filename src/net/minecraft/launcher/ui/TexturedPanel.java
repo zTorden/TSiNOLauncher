@@ -30,23 +30,6 @@ public class TexturedPanel extends JPanel {
 		}
 	}
 
-	public void update(Graphics g) {
-		paint(g);
-	}
-
-	public void paintComponent(Graphics graphics) {
-		int width = getWidth() / 2 + 1;
-		int height = getHeight() / 2 + 1;
-
-		if ((this.image == null) || (this.image.getWidth(null) != width)
-				|| (this.image.getHeight(null) != height)) {
-			this.image = createImage(width, height);
-			copyImage(width, height);
-		}
-
-		graphics.drawImage(this.image, 0, 0, width * 2, height * 2, null);
-	}
-
 	protected void copyImage(int width, int height) {
 		Graphics imageGraphics = this.image.getGraphics();
 
@@ -75,6 +58,25 @@ public class TexturedPanel extends JPanel {
 				new Color(0, true), new Point2D.Float(0.0F, gh), new Color(
 						1610612736, true)));
 		graphics.fillRect(0, 0, width, gh);
+	}
+
+	@Override
+	public void paintComponent(Graphics graphics) {
+		int width = getWidth() / 2 + 1;
+		int height = getHeight() / 2 + 1;
+
+		if ((this.image == null) || (this.image.getWidth(null) != width)
+				|| (this.image.getHeight(null) != height)) {
+			this.image = createImage(width, height);
+			copyImage(width, height);
+		}
+
+		graphics.drawImage(this.image, 0, 0, width * 2, height * 2, null);
+	}
+
+	@Override
+	public void update(Graphics g) {
+		paint(g);
 	}
 }
 

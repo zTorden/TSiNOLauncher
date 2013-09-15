@@ -5,17 +5,17 @@ import java.util.Date;
 public abstract interface Version {
 	public abstract String getId();
 
-	public abstract ReleaseType getType();
+	public abstract Date getReleaseTime();
 
-	public abstract void setType(ReleaseType paramReleaseType);
+	public abstract ReleaseType getType();
 
 	public abstract Date getUpdatedTime();
 
-	public abstract void setUpdatedTime(Date paramDate);
-
-	public abstract Date getReleaseTime();
-
 	public abstract void setReleaseTime(Date paramDate);
+
+	public abstract void setType(ReleaseType paramReleaseType);
+
+	public abstract void setUpdatedTime(Date paramDate);
 }
 
 /*

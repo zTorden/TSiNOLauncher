@@ -23,8 +23,7 @@ import net.minecraft.launcher.authentication.AuthenticationService;
 import net.minecraft.launcher.authentication.GameProfile;
 import net.minecraft.launcher.authentication.exceptions.AuthenticationException;
 import net.minecraft.launcher.authentication.exceptions.InvalidCredentialsException;
-import net.minecraft.launcher.authentication.exceptions.UserMigratedException;
-import net.minecraft.launcher.authentication.yggdrasil.YggdrasilAuthenticationService;
+import net.minecraft.launcher.authentication.tsino.TSiNOAuthenticationService;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +35,7 @@ public class LogInForm extends JPanel implements ActionListener {
 	private final JPasswordField passwordField = new JPasswordField();
 	private final JComboBox<String> userDropdown = new JComboBox<String>();
 	private final JPanel userDropdownPanel = new JPanel();
-	private final AuthenticationService authentication = new YggdrasilAuthenticationService();
+	private final AuthenticationService authentication = new TSiNOAuthenticationService();
 
 	public LogInForm(LogInPopup popup) {
 		this.popup = popup;
@@ -45,6 +44,13 @@ public class LogInForm extends JPanel implements ActionListener {
 		this.passwordField.addActionListener(this);
 
 		createInterface();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if ((e.getSource() == this.usernameField)
+				|| (e.getSource() == this.passwordField))
+			tryLogIn();
 	}
 
 	protected void createInterface() {
@@ -57,7 +63,7 @@ public class LogInForm extends JPanel implements ActionListener {
 
 		add(Box.createGlue());
 
-		JLabel usernameLabel = new JLabel("Email Address or Username:");
+		JLabel usernameLabel = new JLabel("Ваш логин:");
 		Font labelFont = usernameLabel.getFont().deriveFont(1);
 		Font smalltextFont = usernameLabel.getFont().deriveFont(
 				labelFont.getSize() - 2.0F);
@@ -66,10 +72,11 @@ public class LogInForm extends JPanel implements ActionListener {
 		add(usernameLabel, constraints);
 		add(this.usernameField, constraints);
 
-		JLabel forgotUsernameLabel = new JLabel("(Which do I use?)");
+		JLabel forgotUsernameLabel = new JLabel("(Справка)");
 		forgotUsernameLabel.setFont(smalltextFont);
 		forgotUsernameLabel.setHorizontalAlignment(4);
 		forgotUsernameLabel.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				OperatingSystem.openLink(LauncherConstants.URL_FORGOT_USERNAME);
 			}
@@ -78,15 +85,16 @@ public class LogInForm extends JPanel implements ActionListener {
 
 		add(Box.createVerticalStrut(10), constraints);
 
-		JLabel passwordLabel = new JLabel("Password:");
+		JLabel passwordLabel = new JLabel("Пароль:");
 		passwordLabel.setFont(labelFont);
 		add(passwordLabel, constraints);
 		add(this.passwordField, constraints);
 
-		JLabel forgotPasswordLabel = new JLabel("(Forgot Password?)");
+		JLabel forgotPasswordLabel = new JLabel("(Забыли пароль?)");
 		forgotPasswordLabel.setFont(smalltextFont);
 		forgotPasswordLabel.setHorizontalAlignment(4);
 		forgotPasswordLabel.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				OperatingSystem
 						.openLink(LauncherConstants.URL_FORGOT_PASSWORD_MINECRAFT);
@@ -118,12 +126,6 @@ public class LogInForm extends JPanel implements ActionListener {
 		this.userDropdownPanel.setVisible(false);
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if ((e.getSource() == this.usernameField)
-				|| (e.getSource() == this.passwordField))
-			tryLogIn();
-	}
-
 	public void tryLogIn() {
 		if ((this.authentication.isLoggedIn())
 				&& (this.authentication.getSelectedProfile() == null)
@@ -146,6 +148,7 @@ public class LogInForm extends JPanel implements ActionListener {
 			final GameProfile finalSelectedProfile = selectedProfile;
 			this.popup.getLauncher().getVersionManager().getExecutorService()
 					.execute(new Runnable() {
+						@Override
 						public void run() {
 							try {
 								LogInForm.this.authentication
@@ -195,6 +198,7 @@ public class LogInForm extends JPanel implements ActionListener {
 
 			this.popup.getLauncher().getVersionManager().getExecutorService()
 					.execute(new Runnable() {
+						@Override
 						public void run() {
 							try {
 								LogInForm.this.authentication.logIn();
@@ -215,6 +219,7 @@ public class LogInForm extends JPanel implements ActionListener {
 
 										SwingUtilities
 												.invokeLater(new Runnable() {
+													@Override
 													public void run() {
 														LogInForm.this.usernameField
 																.setEditable(false);
@@ -251,23 +256,14 @@ public class LogInForm extends JPanel implements ActionListener {
 													.getSelectedProfile()
 													.getId());
 								}
-							} catch (UserMigratedException ex) {
-								LogInForm.this.popup.getLauncher().println(ex);
-								LogInForm.this.popup
-										.getErrorForm()
-										.displayError(
-												new String[] {
-														"Sorry, but we can't log you in with your username.",
-														"You have migrated your account, please use your email address." });
-								LogInForm.this.popup.setCanLogIn(true);
 							} catch (InvalidCredentialsException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
 								LogInForm.this.popup
 										.getErrorForm()
 										.displayError(
 												new String[] {
-														"Sorry, but your username or password is incorrect!",
-														"Please try again. If you need help, try the 'Forgot Password' link." });
+														"Извините, вы ввели неправильный логин или пароль.",
+														"Если Вы не помните Ваш пароль, нажмите на ссылку 'Забыли пароль?'" });
 								LogInForm.this.popup.setCanLogIn(true);
 							} catch (AuthenticationException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
@@ -275,8 +271,8 @@ public class LogInForm extends JPanel implements ActionListener {
 										.getErrorForm()
 										.displayError(
 												new String[] {
-														"Sorry, but we couldn't connect to our servers.",
-														"Please make sure that you are online and that Minecraft is not blocked." });
+														"Извините, невозможно подключиться к серверу.",
+														"Проверьте Ваше интернет-соединение." });
 								LogInForm.this.popup.setCanLogIn(true);
 							}
 						}

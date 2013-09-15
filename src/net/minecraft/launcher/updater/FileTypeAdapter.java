@@ -8,13 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 public class FileTypeAdapter extends TypeAdapter<File> {
-	public void write(JsonWriter out, File value) throws IOException {
-		if (value == null)
-			out.nullValue();
-		else
-			out.value(value.getAbsolutePath());
-	}
-
+	@Override
 	public File read(JsonReader in) throws IOException {
 		if (in.hasNext()) {
 			String name = in.nextString();
@@ -22,6 +16,14 @@ public class FileTypeAdapter extends TypeAdapter<File> {
 		}
 
 		return null;
+	}
+
+	@Override
+	public void write(JsonWriter out, File value) throws IOException {
+		if (value == null)
+			out.nullValue();
+		else
+			out.value(value.getAbsolutePath());
 	}
 }
 

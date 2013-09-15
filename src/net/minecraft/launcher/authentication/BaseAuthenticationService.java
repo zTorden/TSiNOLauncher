@@ -27,39 +27,68 @@ public abstract class BaseAuthenticationService implements
 		AuthenticationService {
 	private static final String LEGACY_LASTLOGIN_PASSWORD = "passwordfile";
 	private static final int LEGACY_LASTLOGIN_SEED = 43287234;
+
+	private static Cipher getCipher(int mode, String password) throws Exception {
+		Random random = new Random(LEGACY_LASTLOGIN_SEED);
+		byte[] salt = new byte[8];
+		random.nextBytes(salt);
+		PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, 5);
+
+		SecretKey pbeKey = SecretKeyFactory.getInstance("PBEWithMD5AndDES")
+				.generateSecret(new PBEKeySpec(password.toCharArray()));
+		Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+		cipher.init(mode, pbeKey, pbeParamSpec);
+		return cipher;
+	}
+
+	public static String[] getStoredDetails(File lastLoginFile) {
+		if (!lastLoginFile.isFile())
+			return null;
+		try {
+			Cipher cipher = getCipher(2, LEGACY_LASTLOGIN_PASSWORD);
+			DataInputStream dis;
+			if (cipher != null)
+				dis = new DataInputStream(new CipherInputStream(
+						new FileInputStream(lastLoginFile), cipher));
+			else {
+				dis = new DataInputStream(new FileInputStream(lastLoginFile));
+			}
+
+			String username = dis.readUTF();
+			String password = dis.readUTF();
+			dis.close();
+			return new String[] { username, password };
+		} catch (Exception e) {
+			Launcher.getInstance().println("Couldn't load old lastlogin file",
+					e);
+		}
+		return null;
+	}
+
 	private final List<AuthenticationChangedListener> listeners = new ArrayList<AuthenticationChangedListener>();
 	private String username;
 	private String password;
+
 	private GameProfile selectedProfile;
+
 	private boolean shouldRememberMe = true;
 
-	public boolean canLogIn() {
-		return (!canPlayOnline()) && (StringUtils.isNotBlank(getUsername()))
-				&& (StringUtils.isNotBlank(getPassword()));
-	}
-
-	public void logOut() {
-		this.password = null;
-		setSelectedProfile(null);
-	}
-
-	public boolean isLoggedIn() {
-		return getSelectedProfile() != null;
-	}
-
-	public boolean canPlayOnline() {
-		return (isLoggedIn()) && (getSelectedProfile() != null)
-				&& (getSessionToken() != null);
-	}
-
+	@Override
 	public void addAuthenticationChangedListener(
 			AuthenticationChangedListener listener) {
 		this.listeners.add(listener);
 	}
 
-	public void removeAuthenticationChangedListener(
-			AuthenticationChangedListener listener) {
-		this.listeners.remove(listener);
+	@Override
+	public boolean canLogIn() {
+		return (!canPlayOnline()) && (StringUtils.isNotBlank(getUsername()))
+				&& (StringUtils.isNotBlank(getPassword()));
+	}
+
+	@Override
+	public boolean canPlayOnline() {
+		return (isLoggedIn()) && (getSelectedProfile() != null)
+				&& (getSessionToken() != null);
 	}
 
 	protected void fireAuthenticationChangedEvent() {
@@ -68,8 +97,7 @@ public abstract class BaseAuthenticationService implements
 
 		for (Iterator<AuthenticationChangedListener> iterator = listeners
 				.iterator(); iterator.hasNext();) {
-			AuthenticationChangedListener listener = (AuthenticationChangedListener) iterator
-					.next();
+			AuthenticationChangedListener listener = iterator.next();
 
 			if (!listener.shouldReceiveEventsInUIThread()) {
 				listener.onAuthenticationChanged(this);
@@ -79,6 +107,7 @@ public abstract class BaseAuthenticationService implements
 
 		if (!listeners.isEmpty())
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					for (AuthenticationChangedListener listener : listeners)
 						listener.onAuthenticationChanged(BaseAuthenticationService.this);
@@ -86,50 +115,65 @@ public abstract class BaseAuthenticationService implements
 			});
 	}
 
-	public void setUsername(String username) {
-		if ((isLoggedIn()) && (canPlayOnline())) {
-			throw new IllegalStateException(
-					"Cannot change username whilst logged in & online");
-		}
-
-		this.username = username;
-	}
-
-	public void setPassword(String password) {
-		if ((isLoggedIn()) && (canPlayOnline())
-				&& (StringUtils.isNotBlank(password))) {
-			throw new IllegalStateException(
-					"Cannot set password whilst logged in & online");
-		}
-
-		this.password = password;
-	}
-
-	public String getUsername() {
-		return this.username;
-	}
-
 	protected String getPassword() {
 		return this.password;
 	}
 
+	@Override
+	public GameProfile getSelectedProfile() {
+		return this.selectedProfile;
+	}
+
+	@Override
+	public String getUsername() {
+		return this.username;
+	}
+
+	@Override
+	public String guessPasswordFromSillyOldFormat(File file) {
+		String[] details = getStoredDetails(file);
+
+		if ((details != null) && (details[0].equals(getUsername()))) {
+			return details[1];
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean isLoggedIn() {
+		return getSelectedProfile() != null;
+	}
+
+	@Override
 	public void loadFromStorage(Map<String, String> credentials) {
 		logOut();
 
 		if (credentials.containsKey("rememberMe")) {
-			setRememberMe(Boolean.getBoolean((String) credentials
-					.get("rememberMe")));
+			setRememberMe(Boolean.getBoolean(credentials.get("rememberMe")));
 		}
 
-		setUsername((String) credentials.get("username"));
+		setUsername(credentials.get("username"));
 
 		if ((credentials.containsKey("displayName"))
 				&& (credentials.containsKey("uuid")))
-			setSelectedProfile(new GameProfile(
-					(String) credentials.get("uuid"),
-					(String) credentials.get("displayName")));
+			setSelectedProfile(new GameProfile(credentials.get("uuid"),
+					credentials.get("displayName")));
 	}
 
+	@Override
+	public void logOut() {
+		this.password = null;
+		setSelectedProfile(null);
+	}
+
+	@Override
+	public void removeAuthenticationChangedListener(
+			AuthenticationChangedListener listener) {
+		this.listeners.remove(listener);
+	}
+
+	@Override
 	public Map<String, String> saveForStorage() {
 		Map<String, String> result = new HashMap<String, String>();
 
@@ -150,10 +194,18 @@ public abstract class BaseAuthenticationService implements
 		return result;
 	}
 
-	public boolean shouldRememberMe() {
-		return this.shouldRememberMe;
+	@Override
+	public void setPassword(String password) {
+		if ((isLoggedIn()) && (canPlayOnline())
+				&& (StringUtils.isNotBlank(password))) {
+			throw new IllegalStateException(
+					"Cannot set password whilst logged in & online");
+		}
+
+		this.password = password;
 	}
 
+	@Override
 	public void setRememberMe(boolean rememberMe) {
 		this.shouldRememberMe = rememberMe;
 	}
@@ -162,10 +214,22 @@ public abstract class BaseAuthenticationService implements
 		this.selectedProfile = selectedProfile;
 	}
 
-	public GameProfile getSelectedProfile() {
-		return this.selectedProfile;
+	@Override
+	public void setUsername(String username) {
+		if ((isLoggedIn()) && (canPlayOnline())) {
+			throw new IllegalStateException(
+					"Cannot change username whilst logged in & online");
+		}
+
+		this.username = username;
 	}
 
+	@Override
+	public boolean shouldRememberMe() {
+		return this.shouldRememberMe;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 
@@ -197,57 +261,4 @@ public abstract class BaseAuthenticationService implements
 
 		return result.toString();
 	}
-
-	public String guessPasswordFromSillyOldFormat(File file) {
-		String[] details = getStoredDetails(file);
-
-		if ((details != null) && (details[0].equals(getUsername()))) {
-			return details[1];
-		}
-
-		return null;
-	}
-
-	public static String[] getStoredDetails(File lastLoginFile) {
-		if (!lastLoginFile.isFile())
-			return null;
-		try {
-			Cipher cipher = getCipher(2, "passwordfile");
-			DataInputStream dis;
-			if (cipher != null)
-				dis = new DataInputStream(new CipherInputStream(
-						new FileInputStream(lastLoginFile), cipher));
-			else {
-				dis = new DataInputStream(new FileInputStream(lastLoginFile));
-			}
-
-			String username = dis.readUTF();
-			String password = dis.readUTF();
-			dis.close();
-			return new String[] { username, password };
-		} catch (Exception e) {
-			Launcher.getInstance().println("Couldn't load old lastlogin file",
-					e);
-		}
-		return null;
-	}
-
-	private static Cipher getCipher(int mode, String password) throws Exception {
-		Random random = new Random(43287234L);
-		byte[] salt = new byte[8];
-		random.nextBytes(salt);
-		PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, 5);
-
-		SecretKey pbeKey = SecretKeyFactory.getInstance("PBEWithMD5AndDES")
-				.generateSecret(new PBEKeySpec(password.toCharArray()));
-		Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
-		cipher.init(mode, pbeKey, pbeParamSpec);
-		return cipher;
-	}
 }
-
-/*
- * Location: Z:\home\vadim\.minecraft\launcher.jar Qualified Name:
- * net.minecraft.launcher.authentication.BaseAuthenticationService JD-Core
- * Version: 0.6.2
- */

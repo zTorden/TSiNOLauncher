@@ -12,6 +12,7 @@ public class MonitoringInputStream extends FilterInputStream {
 		this.monitor = monitor;
 	}
 
+	@Override
 	public int read() throws IOException {
 		int result = this.in.read();
 
@@ -22,6 +23,7 @@ public class MonitoringInputStream extends FilterInputStream {
 		return result;
 	}
 
+	@Override
 	public int read(byte[] buffer) throws IOException {
 		int size = this.in.read(buffer);
 
@@ -32,6 +34,7 @@ public class MonitoringInputStream extends FilterInputStream {
 		return size;
 	}
 
+	@Override
 	public int read(byte[] buffer, int off, int len) throws IOException {
 		int size = this.in.read(buffer, off, len);
 
@@ -42,6 +45,7 @@ public class MonitoringInputStream extends FilterInputStream {
 		return size;
 	}
 
+	@Override
 	public long skip(long size) throws IOException {
 		long skipped = super.skip(size);
 

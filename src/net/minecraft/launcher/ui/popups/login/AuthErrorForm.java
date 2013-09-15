@@ -6,6 +6,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 public class AuthErrorForm extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6384686603820013233L;
 	private final LogInPopup popup;
 	private final JLabel errorLabel = new JLabel();
 
@@ -16,19 +20,14 @@ public class AuthErrorForm extends JPanel {
 		clear();
 	}
 
-	protected void createInterface() {
-		setBorder(new EmptyBorder(0, 0, 15, 0));
-		this.errorLabel.setFont(this.errorLabel.getFont().deriveFont(1));
-		add(this.errorLabel);
-	}
-
 	public void clear() {
 		setVisible(false);
 	}
 
-	public void setVisible(boolean value) {
-		super.setVisible(value);
-		this.popup.repack();
+	protected void createInterface() {
+		setBorder(new EmptyBorder(0, 0, 15, 0));
+		this.errorLabel.setFont(this.errorLabel.getFont().deriveFont(1));
+		add(this.errorLabel);
 	}
 
 	public void displayError(final String[] lines) {
@@ -42,11 +41,18 @@ public class AuthErrorForm extends JPanel {
 			setVisible(true);
 		} else {
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					AuthErrorForm.this.displayError(lines);
 				}
 			});
 		}
+	}
+
+	@Override
+	public void setVisible(boolean value) {
+		super.setVisible(value);
+		this.popup.repack();
 	}
 }
 

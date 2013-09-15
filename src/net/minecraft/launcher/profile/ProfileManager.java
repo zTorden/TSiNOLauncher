@@ -28,6 +28,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class ProfileManager {
+	private static class RawProfileList {
+		public Map<String, Profile> profiles = new HashMap<String, Profile>();
+		public String selectedProfile;
+		public UUID clientToken = UUID.randomUUID();
+		public AuthenticationDatabase authenticationDatabase = new AuthenticationDatabase();
+	}
+
 	public static final String DEFAULT_PROFILE_NAME = "(Default)";
 	private final Launcher launcher;
 	private final Gson gson;
@@ -36,6 +43,7 @@ public class ProfileManager {
 	private final List<RefreshedProfilesListener> refreshedProfilesListeners = Collections
 			.synchronizedList(new ArrayList<RefreshedProfilesListener>());
 	private String selectedProfile;
+
 	private AuthenticationDatabase authDatabase = new AuthenticationDatabase();
 
 	public ProfileManager(Launcher launcher) {
@@ -53,15 +61,61 @@ public class ProfileManager {
 		this.gson = builder.create();
 	}
 
-	public void saveProfiles() throws IOException {
-		RawProfileList rawProfileList = new RawProfileList();
-		rawProfileList.profiles = this.profiles;
-		rawProfileList.selectedProfile = getSelectedProfile().getName();
-		rawProfileList.clientToken = this.launcher.getClientToken();
-		rawProfileList.authenticationDatabase = this.authDatabase;
+	public void addRefreshedProfilesListener(RefreshedProfilesListener listener) {
+		this.refreshedProfilesListeners.add(listener);
+	}
 
-		FileUtils.writeStringToFile(this.profileFile,
-				this.gson.toJson(rawProfileList));
+	public void fireRefreshEvent() {
+		final List<RefreshedProfilesListener> listeners = new ArrayList<RefreshedProfilesListener>(
+				this.refreshedProfilesListeners);
+		for (Iterator<RefreshedProfilesListener> iterator = listeners
+				.iterator(); iterator.hasNext();) {
+			RefreshedProfilesListener listener = iterator.next();
+
+			if (!listener.shouldReceiveEventsInUIThread()) {
+				listener.onProfilesRefreshed(this);
+				iterator.remove();
+			}
+		}
+
+		if (!listeners.isEmpty())
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					for (RefreshedProfilesListener listener : listeners)
+						listener.onProfilesRefreshed(ProfileManager.this);
+				}
+			});
+	}
+
+	public AuthenticationDatabase getAuthDatabase() {
+		return this.authDatabase;
+	}
+
+	public Launcher getLauncher() {
+		return this.launcher;
+	}
+
+	public Map<String, Profile> getProfiles() {
+		return this.profiles;
+	}
+
+	public Profile getSelectedProfile() {
+		if ((this.selectedProfile == null)
+				|| (!this.profiles.containsKey(this.selectedProfile))) {
+			if (this.profiles.get("(Default)") != null) {
+				this.selectedProfile = "(Default)";
+			} else if (this.profiles.size() > 0) {
+				this.selectedProfile = this.profiles.values().iterator().next()
+						.getName();
+			} else {
+				this.selectedProfile = "(Default)";
+				this.profiles.put("(Default)",
+						new Profile(this.selectedProfile));
+			}
+		}
+
+		return this.profiles.get(this.selectedProfile);
 	}
 
 	public boolean loadProfiles() throws IOException {
@@ -69,9 +123,9 @@ public class ProfileManager {
 		this.selectedProfile = null;
 
 		if (this.profileFile.isFile()) {
-			RawProfileList rawProfileList = (RawProfileList) this.gson
-					.fromJson(FileUtils.readFileToString(this.profileFile),
-							RawProfileList.class);
+			RawProfileList rawProfileList = this.gson.fromJson(
+					FileUtils.readFileToString(this.profileFile),
+					RawProfileList.class);
 
 			this.profiles.putAll(rawProfileList.profiles);
 			this.selectedProfile = rawProfileList.selectedProfile;
@@ -85,57 +139,15 @@ public class ProfileManager {
 		return false;
 	}
 
-	public void fireRefreshEvent() {
-		final List<RefreshedProfilesListener> listeners = new ArrayList<RefreshedProfilesListener>(
-				this.refreshedProfilesListeners);
-		for (Iterator<RefreshedProfilesListener> iterator = listeners
-				.iterator(); iterator.hasNext();) {
-			RefreshedProfilesListener listener = (RefreshedProfilesListener) iterator
-					.next();
+	public void saveProfiles() throws IOException {
+		RawProfileList rawProfileList = new RawProfileList();
+		rawProfileList.profiles = this.profiles;
+		rawProfileList.selectedProfile = getSelectedProfile().getName();
+		rawProfileList.clientToken = this.launcher.getClientToken();
+		rawProfileList.authenticationDatabase = this.authDatabase;
 
-			if (!listener.shouldReceiveEventsInUIThread()) {
-				listener.onProfilesRefreshed(this);
-				iterator.remove();
-			}
-		}
-
-		if (!listeners.isEmpty())
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					for (RefreshedProfilesListener listener : listeners)
-						listener.onProfilesRefreshed(ProfileManager.this);
-				}
-			});
-	}
-
-	public Profile getSelectedProfile() {
-		if ((this.selectedProfile == null)
-				|| (!this.profiles.containsKey(this.selectedProfile))) {
-			if (this.profiles.get("(Default)") != null) {
-				this.selectedProfile = "(Default)";
-			} else if (this.profiles.size() > 0) {
-				this.selectedProfile = ((Profile) this.profiles.values()
-						.iterator().next()).getName();
-			} else {
-				this.selectedProfile = "(Default)";
-				this.profiles.put("(Default)",
-						new Profile(this.selectedProfile));
-			}
-		}
-
-		return (Profile) this.profiles.get(this.selectedProfile);
-	}
-
-	public Map<String, Profile> getProfiles() {
-		return this.profiles;
-	}
-
-	public Launcher getLauncher() {
-		return this.launcher;
-	}
-
-	public void addRefreshedProfilesListener(RefreshedProfilesListener listener) {
-		this.refreshedProfilesListeners.add(listener);
+		FileUtils.writeStringToFile(this.profileFile,
+				this.gson.toJson(rawProfileList));
 	}
 
 	public void setSelectedProfile(String selectedProfile) {
@@ -144,10 +156,6 @@ public class ProfileManager {
 
 		if (update)
 			fireRefreshEvent();
-	}
-
-	public AuthenticationDatabase getAuthDatabase() {
-		return this.authDatabase;
 	}
 
 	public void trimAuthDatabase() {
@@ -160,13 +168,6 @@ public class ProfileManager {
 
 		for (String uuid : uuids)
 			this.authDatabase.removeUUID(uuid);
-	}
-
-	private static class RawProfileList {
-		public Map<String, Profile> profiles = new HashMap<String, Profile>();
-		public String selectedProfile;
-		public UUID clientToken = UUID.randomUUID();
-		public AuthenticationDatabase authenticationDatabase = new AuthenticationDatabase();
 	}
 }
 

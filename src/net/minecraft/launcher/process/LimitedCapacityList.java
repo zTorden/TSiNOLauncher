@@ -29,20 +29,6 @@ public class LimitedCapacityList<T> {
 		return value;
 	}
 
-	public int getSize() {
-		this.locks.readLock().lock();
-		int result = this.size;
-		this.locks.readLock().unlock();
-		return result;
-	}
-
-	public int getMaxSize() {
-		this.locks.readLock().lock();
-		int result = this.items.length;
-		this.locks.readLock().unlock();
-		return result;
-	}
-
 	@SuppressWarnings("unchecked")
 	public T[] getItems() {
 		T[] result = (T[]) Array.newInstance(this.clazz, this.size);
@@ -56,6 +42,20 @@ public class LimitedCapacityList<T> {
 		}
 		this.locks.readLock().unlock();
 
+		return result;
+	}
+
+	public int getMaxSize() {
+		this.locks.readLock().lock();
+		int result = this.items.length;
+		this.locks.readLock().unlock();
+		return result;
+	}
+
+	public int getSize() {
+		this.locks.readLock().lock();
+		int result = this.size;
+		this.locks.readLock().unlock();
 		return result;
 	}
 }

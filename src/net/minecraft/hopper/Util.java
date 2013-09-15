@@ -12,6 +12,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 public class Util {
+	public static URL constantURL(String input) {
+		try {
+			return new URL(input);
+		} catch (MalformedURLException e) {
+			throw new Error(e);
+		}
+	}
+
 	public static String performPost(URL url, String parameters, Proxy proxy,
 			String contentType, boolean returnErrorPage) throws IOException {
 		HttpURLConnection connection = (HttpURLConnection) url
@@ -19,7 +27,7 @@ public class Util {
 		byte[] paramAsBytes = parameters.getBytes(Charset.forName("UTF-8"));
 
 		connection.setConnectTimeout(15000);
-		connection.setReadTimeout(15000);
+		connection.setReadTimeout(60000);
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Content-Type", new StringBuilder()
 				.append(contentType).append("; charset=utf-8").toString());
@@ -62,13 +70,5 @@ public class Util {
 
 		reader.close();
 		return response.toString();
-	}
-
-	public static URL constantURL(String input) {
-		try {
-			return new URL(input);
-		} catch (MalformedURLException e) {
-			throw new Error(e);
-		}
 	}
 }

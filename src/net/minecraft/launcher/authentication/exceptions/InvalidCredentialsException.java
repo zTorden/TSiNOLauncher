@@ -1,6 +1,9 @@
 package net.minecraft.launcher.authentication.exceptions;
 
 public class InvalidCredentialsException extends AuthenticationException {
+
+	private static final long serialVersionUID = 1L;
+
 	public InvalidCredentialsException() {
 	}
 
@@ -16,9 +19,3 @@ public class InvalidCredentialsException extends AuthenticationException {
 		super(cause);
 	}
 }
-
-/*
- * Location: Z:\home\vadim\.minecraft\launcher.jar Qualified Name:
- * net.minecraft.launcher.authentication.exceptions.InvalidCredentialsException
- * JD-Core Version: 0.6.2
- */

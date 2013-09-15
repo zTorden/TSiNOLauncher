@@ -15,6 +15,7 @@ public enum LauncherVisibilityRule {
 		return this.name;
 	}
 
+	@Override
 	public String toString() {
 		return this.name;
 	}

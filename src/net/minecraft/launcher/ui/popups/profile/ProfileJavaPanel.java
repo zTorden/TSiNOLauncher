@@ -16,6 +16,10 @@ import javax.swing.event.DocumentListener;
 import net.minecraft.launcher.OperatingSystem;
 
 public class ProfileJavaPanel extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 131578166330871594L;
 	private final ProfileEditorPopup editor;
 	private final JCheckBox javaPathCustom = new JCheckBox("Executable:");
 	private final JTextField javaPathField = new JTextField();
@@ -31,6 +35,55 @@ public class ProfileJavaPanel extends JPanel {
 		createInterface();
 		fillDefaultValues();
 		addEventHandlers();
+	}
+
+	protected void addEventHandlers() {
+		this.javaPathCustom.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileJavaPanel.this.updateJavaPathState();
+			}
+		});
+		this.javaPathField.getDocument().addDocumentListener(
+				new DocumentListener() {
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaPath();
+					}
+
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaPath();
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaPath();
+					}
+				});
+		this.javaArgsCustom.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileJavaPanel.this.updateJavaArgsState();
+			}
+		});
+		this.javaArgsField.getDocument().addDocumentListener(
+				new DocumentListener() {
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaArgs();
+					}
+
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaArgs();
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						ProfileJavaPanel.this.updateJavaArgs();
+					}
+				});
 	}
 
 	protected void createInterface() {
@@ -82,45 +135,21 @@ public class ProfileJavaPanel extends JPanel {
 		updateJavaArgsState();
 	}
 
-	protected void addEventHandlers() {
-		this.javaPathCustom.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileJavaPanel.this.updateJavaPathState();
-			}
-		});
-		this.javaPathField.getDocument().addDocumentListener(
-				new DocumentListener() {
-					public void insertUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaPath();
-					}
+	private void updateJavaArgs() {
+		if (this.javaArgsCustom.isSelected())
+			this.editor.getProfile().setJavaArgs(this.javaArgsField.getText());
+		else
+			this.editor.getProfile().setJavaArgs(null);
+	}
 
-					public void removeUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaPath();
-					}
-
-					public void changedUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaPath();
-					}
-				});
-		this.javaArgsCustom.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileJavaPanel.this.updateJavaArgsState();
-			}
-		});
-		this.javaArgsField.getDocument().addDocumentListener(
-				new DocumentListener() {
-					public void insertUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaArgs();
-					}
-
-					public void removeUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaArgs();
-					}
-
-					public void changedUpdate(DocumentEvent e) {
-						ProfileJavaPanel.this.updateJavaArgs();
-					}
-				});
+	private void updateJavaArgsState() {
+		if (this.javaArgsCustom.isSelected()) {
+			this.javaArgsField.setEnabled(true);
+			this.editor.getProfile().setJavaArgs(this.javaArgsField.getText());
+		} else {
+			this.javaArgsField.setEnabled(false);
+			this.editor.getProfile().setJavaArgs(null);
+		}
 	}
 
 	private void updateJavaPath() {
@@ -137,23 +166,6 @@ public class ProfileJavaPanel extends JPanel {
 		} else {
 			this.javaPathField.setEnabled(false);
 			this.editor.getProfile().setJavaDir(null);
-		}
-	}
-
-	private void updateJavaArgs() {
-		if (this.javaArgsCustom.isSelected())
-			this.editor.getProfile().setJavaArgs(this.javaArgsField.getText());
-		else
-			this.editor.getProfile().setJavaArgs(null);
-	}
-
-	private void updateJavaArgsState() {
-		if (this.javaArgsCustom.isSelected()) {
-			this.javaArgsField.setEnabled(true);
-			this.editor.getProfile().setJavaArgs(this.javaArgsField.getText());
-		} else {
-			this.javaArgsField.setEnabled(false);
-			this.editor.getProfile().setJavaArgs(null);
 		}
 	}
 }

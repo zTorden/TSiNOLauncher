@@ -26,6 +26,7 @@ public class DateTypeAdapter implements JsonDeserializer<Date>,
 		this.iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	}
 
+	@Override
 	public Date deserialize(JsonElement json, Type typeOfT,
 			JsonDeserializationContext context) throws JsonParseException {
 		if (!(json instanceof JsonPrimitive)) {
@@ -39,13 +40,6 @@ public class DateTypeAdapter implements JsonDeserializer<Date>,
 		}
 		throw new IllegalArgumentException(getClass()
 				+ " cannot deserialize to " + typeOfT);
-	}
-
-	public JsonElement serialize(Date src, Type typeOfSrc,
-			JsonSerializationContext context) {
-		synchronized (this.enUsFormat) {
-			return new JsonPrimitive(serializeToString(src));
-		}
 	}
 
 	private Date deserializeToDate(JsonElement json) {
@@ -68,6 +62,14 @@ public class DateTypeAdapter implements JsonDeserializer<Date>,
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public JsonElement serialize(Date src, Type typeOfSrc,
+			JsonSerializationContext context) {
+		synchronized (this.enUsFormat) {
+			return new JsonPrimitive(serializeToString(src));
 		}
 	}
 

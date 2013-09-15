@@ -3,9 +3,14 @@ package net.minecraft.launcher.updater;
 import net.minecraft.launcher.versions.Version;
 
 public class VersionSyncInfo {
+	public static enum VersionSource {
+		REMOTE, LOCAL;
+	}
+
 	private final Version localVersion;
 	private final Version remoteVersion;
 	private final boolean isInstalled;
+
 	private final boolean isUpToDate;
 
 	public VersionSyncInfo(Version localVersion, Version remoteVersion,
@@ -14,21 +19,6 @@ public class VersionSyncInfo {
 		this.remoteVersion = remoteVersion;
 		this.isInstalled = installed;
 		this.isUpToDate = upToDate;
-	}
-
-	public Version getLocalVersion() {
-		return this.localVersion;
-	}
-
-	public Version getRemoteVersion() {
-		return this.remoteVersion;
-	}
-
-	public Version getLatestVersion() {
-		if (getLatestSource() == VersionSource.REMOTE) {
-			return this.remoteVersion;
-		}
-		return this.localVersion;
 	}
 
 	public VersionSource getLatestSource() {
@@ -40,6 +30,21 @@ public class VersionSyncInfo {
 				getLocalVersion().getUpdatedTime()))
 			return VersionSource.REMOTE;
 		return VersionSource.LOCAL;
+	}
+
+	public Version getLatestVersion() {
+		if (getLatestSource() == VersionSource.REMOTE) {
+			return this.remoteVersion;
+		}
+		return this.localVersion;
+	}
+
+	public Version getLocalVersion() {
+		return this.localVersion;
+	}
+
+	public Version getRemoteVersion() {
+		return this.remoteVersion;
 	}
 
 	public boolean isInstalled() {
@@ -54,14 +59,11 @@ public class VersionSyncInfo {
 		return this.isUpToDate;
 	}
 
+	@Override
 	public String toString() {
 		return "VersionSyncInfo{localVersion=" + this.localVersion
 				+ ", remoteVersion=" + this.remoteVersion + ", isInstalled="
 				+ this.isInstalled + ", isUpToDate=" + this.isUpToDate + '}';
-	}
-
-	public static enum VersionSource {
-		REMOTE, LOCAL;
 	}
 }
 

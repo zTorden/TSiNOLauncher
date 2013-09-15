@@ -20,9 +20,24 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public abstract class VersionList {
+	private static class RawVersionList {
+		private List<PartialVersion> versions = new ArrayList<PartialVersion>();
+		private Map<ReleaseType, String> latest = new EnumMap<ReleaseType, String>(
+				ReleaseType.class);
+
+		public Map<ReleaseType, String> getLatestVersions() {
+			return this.latest;
+		}
+
+		public List<PartialVersion> getVersions() {
+			return this.versions;
+		}
+	}
+
 	protected final Gson gson;
 	private final Map<String, Version> versionsByName = new HashMap<String, Version>();
 	private final List<Version> versions = new ArrayList<Version>();
+
 	private final Map<ReleaseType, Version> latestVersions = new EnumMap<ReleaseType, Version>(
 			ReleaseType.class);
 
@@ -36,20 +51,23 @@ public abstract class VersionList {
 		this.gson = builder.create();
 	}
 
-	public Collection<Version> getVersions() {
-		return this.versions;
+	public CompleteVersion addVersion(CompleteVersion version) {
+		if (version.getId() == null)
+			throw new IllegalArgumentException("Cannot add blank version");
+		if (getVersion(version.getId()) != null)
+			throw new IllegalArgumentException("Version '" + version.getId()
+					+ "' is already tracked");
+
+		this.versions.add(version);
+		this.versionsByName.put(version.getId(), version);
+
+		return version;
 	}
 
-	public Version getLatestVersion(ReleaseType type) {
-		if (type == null)
-			throw new IllegalArgumentException("Type cannot be null");
-		return (Version) this.latestVersions.get(type);
-	}
-
-	public Version getVersion(String name) {
-		if ((name == null) || (name.length() == 0))
-			throw new IllegalArgumentException("Name cannot be null or empty");
-		return (Version) this.versionsByName.get(name);
+	protected void clearCache() {
+		this.versionsByName.clear();
+		this.versions.clear();
+		this.latestVersions.clear();
 	}
 
 	public CompleteVersion getCompleteVersion(String name) throws IOException {
@@ -69,9 +87,11 @@ public abstract class VersionList {
 		if (version == null)
 			throw new IllegalArgumentException("Version cannot be null");
 
-		CompleteVersion complete = (CompleteVersion) this.gson.fromJson(
-				getContent("versions/" + version.getId() + "/"
-						+ version.getId() + ".json"), CompleteVersion.class);
+		String content = getContent("versions/" + version.getId() + "/"
+				+ version.getId() + ".json");
+
+		CompleteVersion complete = this.gson.fromJson(content,
+				CompleteVersion.class);
 		ReleaseType type = version.getType();
 
 		Collections.replaceAll(this.versions, version, complete);
@@ -84,16 +104,31 @@ public abstract class VersionList {
 		return complete;
 	}
 
-	protected void clearCache() {
-		this.versionsByName.clear();
-		this.versions.clear();
-		this.latestVersions.clear();
+	protected abstract String getContent(String paramString) throws IOException;
+
+	public Version getLatestVersion(ReleaseType type) {
+		if (type == null)
+			throw new IllegalArgumentException("Type cannot be null");
+		return this.latestVersions.get(type);
 	}
+
+	public Version getVersion(String name) {
+		if ((name == null) || (name.length() == 0))
+			throw new IllegalArgumentException("Name cannot be null or empty");
+		return this.versionsByName.get(name);
+	}
+
+	public Collection<Version> getVersions() {
+		return this.versions;
+	}
+
+	public abstract boolean hasAllFiles(CompleteVersion paramCompleteVersion,
+			OperatingSystem paramOperatingSystem);
 
 	public void refreshVersions() throws IOException {
 		clearCache();
 
-		RawVersionList versionList = (RawVersionList) this.gson.fromJson(
+		RawVersionList versionList = this.gson.fromJson(
 				getContent("versions/versions.json"), RawVersionList.class);
 
 		for (Version version : versionList.getVersions()) {
@@ -104,19 +139,6 @@ public abstract class VersionList {
 		for (ReleaseType type : ReleaseType.values())
 			this.latestVersions.put(type, this.versionsByName.get(versionList
 					.getLatestVersions().get(type)));
-	}
-
-	public CompleteVersion addVersion(CompleteVersion version) {
-		if (version.getId() == null)
-			throw new IllegalArgumentException("Cannot add blank version");
-		if (getVersion(version.getId()) != null)
-			throw new IllegalArgumentException("Version '" + version.getId()
-					+ "' is already tracked");
-
-		this.versions.add(version);
-		this.versionsByName.put(version.getId(), version);
-
-		return version;
 	}
 
 	public void removeVersion(String name) {
@@ -140,21 +162,10 @@ public abstract class VersionList {
 				this.latestVersions.remove(type);
 	}
 
-	public void setLatestVersion(Version version) {
+	public String serializeVersion(CompleteVersion version) {
 		if (version == null)
-			throw new IllegalArgumentException(
-					"Cannot set latest version to null");
-		this.latestVersions.put(version.getType(), version);
-	}
-
-	public void setLatestVersion(String name) {
-		if ((name == null) || (name.length() == 0))
-			throw new IllegalArgumentException("Name cannot be null or empty");
-		Version version = getVersion(name);
-		if (version == null)
-			throw new IllegalArgumentException(
-					"Unknown version - cannot set latest version to null");
-		setLatestVersion(version);
+			throw new IllegalArgumentException("Cannot serialize null!");
+		return this.gson.toJson(version);
 	}
 
 	public String serializeVersionList() {
@@ -182,28 +193,21 @@ public abstract class VersionList {
 		return this.gson.toJson(list);
 	}
 
-	public String serializeVersion(CompleteVersion version) {
+	public void setLatestVersion(String name) {
+		if ((name == null) || (name.length() == 0))
+			throw new IllegalArgumentException("Name cannot be null or empty");
+		Version version = getVersion(name);
 		if (version == null)
-			throw new IllegalArgumentException("Cannot serialize null!");
-		return this.gson.toJson(version);
+			throw new IllegalArgumentException(
+					"Unknown version - cannot set latest version to null");
+		setLatestVersion(version);
 	}
 
-	public abstract boolean hasAllFiles(CompleteVersion paramCompleteVersion,
-			OperatingSystem paramOperatingSystem);
-
-	protected abstract String getContent(String paramString) throws IOException;
-
-	private static class RawVersionList {
-		private List<PartialVersion> versions = new ArrayList<PartialVersion>();
-		private Map<ReleaseType, String> latest = new EnumMap<ReleaseType, String>(ReleaseType.class);
-
-		public List<PartialVersion> getVersions() {
-			return this.versions;
-		}
-
-		public Map<ReleaseType, String> getLatestVersions() {
-			return this.latest;
-		}
+	public void setLatestVersion(Version version) {
+		if (version == null)
+			throw new IllegalArgumentException(
+					"Cannot set latest version to null");
+		this.latestVersions.put(version.getType(), version);
 	}
 }
 

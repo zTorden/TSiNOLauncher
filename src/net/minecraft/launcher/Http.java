@@ -23,8 +23,7 @@ public class Http {
 				builder.append('&');
 			}
 			try {
-				builder.append(URLEncoder.encode((String) entry.getKey(),
-						"UTF-8"));
+				builder.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				Launcher.getInstance().println(
 						"Unexpected exception building query", e);
@@ -45,10 +44,14 @@ public class Http {
 		return builder.toString();
 	}
 
-	public static String performPost(URL url, Map<String, Object> query,
-			Proxy proxy) throws IOException {
-		return Util.performPost(url, buildQuery(query), proxy,
-				"application/x-www-form-urlencoded", false);
+	public static URL concatenateURL(URL url, String args)
+			throws MalformedURLException {
+		if ((url.getQuery() != null) && (url.getQuery().length() > 0)) {
+			return new URL(url.getProtocol(), url.getHost(), url.getFile()
+					+ "?" + args);
+		}
+		return new URL(url.getProtocol(), url.getHost(), url.getFile() + "&"
+				+ args);
 	}
 
 	public static String performGet(URL url, Proxy proxy) throws IOException {
@@ -66,14 +69,10 @@ public class Http {
 		}
 	}
 
-	public static URL concatenateURL(URL url, String args)
-			throws MalformedURLException {
-		if ((url.getQuery() != null) && (url.getQuery().length() > 0)) {
-			return new URL(url.getProtocol(), url.getHost(), url.getFile()
-					+ "?" + args);
-		}
-		return new URL(url.getProtocol(), url.getHost(), url.getFile() + "&"
-				+ args);
+	public static String performPost(URL url, Map<String, Object> query,
+			Proxy proxy) throws IOException {
+		return Util.performPost(url, buildQuery(query), proxy,
+				"application/x-www-form-urlencoded", false);
 	}
 }
 

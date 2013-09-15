@@ -8,39 +8,6 @@ public enum OperatingSystem {
 			new String[] { "win" }), OSX("osx", new String[] { "mac" }), UNKNOWN(
 			"unknown", new String[0]);
 
-	private final String name;
-	private final String[] aliases;
-
-	private OperatingSystem(String name, String[] aliases) {
-		this.name = name;
-		this.aliases = (aliases == null ? new String[0] : aliases);
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public String[] getAliases() {
-		return this.aliases;
-	}
-
-	public boolean isSupported() {
-		return this != UNKNOWN;
-	}
-
-	public String getJavaDir() {
-		String separator = System.getProperty("file.separator");
-		String path = System.getProperty("java.home") + separator + "bin"
-				+ separator;
-
-		if ((getCurrentPlatform() == WINDOWS)
-				&& (new File(path + "javaw.exe").isFile())) {
-			return path + "javaw.exe";
-		}
-
-		return path + "java";
-	}
-
 	public static OperatingSystem getCurrentPlatform() {
 		String osName = System.getProperty("os.name").toLowerCase();
 
@@ -65,6 +32,40 @@ public enum OperatingSystem {
 			Launcher.getInstance().println(
 					"Failed to open link " + link.toString(), e);
 		}
+	}
+
+	private final String name;
+
+	private final String[] aliases;
+
+	private OperatingSystem(String name, String[] aliases) {
+		this.name = name;
+		this.aliases = (aliases == null ? new String[0] : aliases);
+	}
+
+	public String[] getAliases() {
+		return this.aliases;
+	}
+
+	public String getJavaDir() {
+		String separator = System.getProperty("file.separator");
+		String path = System.getProperty("java.home") + separator + "bin"
+				+ separator;
+
+		if ((getCurrentPlatform() == WINDOWS)
+				&& (new File(path + "javaw.exe").isFile())) {
+			return path + "javaw.exe";
+		}
+
+		return path + "java";
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public boolean isSupported() {
+		return this != UNKNOWN;
 	}
 }
 

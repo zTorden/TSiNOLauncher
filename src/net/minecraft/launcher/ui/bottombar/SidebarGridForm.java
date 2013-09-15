@@ -7,16 +7,10 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 public abstract class SidebarGridForm extends JPanel {
-	protected void createInterface() {
-		GridBagLayout layout = new GridBagLayout();
-		GridBagConstraints constraints = new GridBagConstraints();
-		setLayout(layout);
-
-		populateGrid(constraints);
-	}
-
-	protected abstract void populateGrid(
-			GridBagConstraints paramGridBagConstraints);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3531723667581452984L;
 
 	protected <T extends Component> T add(T component,
 			GridBagConstraints constraints, int x, int y, int weight, int width) {
@@ -36,6 +30,17 @@ public abstract class SidebarGridForm extends JPanel {
 		add(component, constraints);
 		return component;
 	}
+
+	protected void createInterface() {
+		GridBagLayout layout = new GridBagLayout();
+		GridBagConstraints constraints = new GridBagConstraints();
+		setLayout(layout);
+
+		populateGrid(constraints);
+	}
+
+	protected abstract void populateGrid(
+			GridBagConstraints paramGridBagConstraints);
 }
 
 /*

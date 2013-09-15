@@ -29,6 +29,81 @@ import net.minecraft.launcher.ui.popups.profile.ProfileEditorPopup;
 
 public class ProfileListTab extends JScrollPane implements
 		RefreshedProfilesListener {
+	private class ProfileTableModel extends AbstractTableModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5971020761573278260L;
+		private final List<Profile> profiles = new ArrayList<Profile>();
+
+		private ProfileTableModel() {
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return String.class;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return NUM_COLUMNS;
+		}
+
+		@Override
+		public String getColumnName(int column) {
+			switch (column) {
+			case COLUMN_AUTHENTICATION:
+				return "Username";
+			case COLUMN_VERSION:
+				return "Version";
+			case COLUMN_NAME:
+				return "Version name";
+			}
+			return super.getColumnName(column);
+		}
+
+		@Override
+		public int getRowCount() {
+			return this.profiles.size();
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			Profile profile = this.profiles.get(rowIndex);
+			AuthenticationDatabase authDatabase = ProfileListTab.this.launcher
+					.getProfileManager().getAuthDatabase();
+			AuthenticationService auth = authDatabase.getByUUID(profile
+					.getPlayerUUID());
+
+			switch (columnIndex) {
+			case COLUMN_NAME:
+				return profile.getName();
+			case COLUMN_AUTHENTICATION:
+				if ((auth != null) && (auth.getSelectedProfile() != null)) {
+					return auth.getSelectedProfile().getName();
+				}
+				return "(Not logged in)";
+			case COLUMN_VERSION:
+				if (profile.getLastVersionId() == null) {
+					return "(Latest version)";
+				}
+				return profile.getLastVersionId();
+			}
+
+			return null;
+		}
+
+		public void setProfiles(Collection<Profile> profiles) {
+			this.profiles.clear();
+			this.profiles.addAll(profiles);
+			fireTableDataChanged();
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4116416784904384279L;
 	private static final int COLUMN_NAME = 0;
 	private static final int COLUMN_VERSION = 1;
 	private static final int COLUMN_AUTHENTICATION = 2;
@@ -39,6 +114,7 @@ public class ProfileListTab extends JScrollPane implements
 	private final JPopupMenu popupMenu = new JPopupMenu();
 	private final JMenuItem addProfileButton = new JMenuItem("Add Profile");
 	private final JMenuItem copyProfileButton = new JMenuItem("Copy Profile");
+
 	private final JMenuItem deleteProfileButton = new JMenuItem(
 			"Delete Profile");
 
@@ -60,6 +136,15 @@ public class ProfileListTab extends JScrollPane implements
 		this.table.setSelectionMode(0);
 
 		this.popupMenu.addPopupMenuListener(new PopupMenuListener() {
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
+
+			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				int[] selection = ProfileListTab.this.table.getSelectedRows();
 				boolean hasSelection = (selection != null)
@@ -69,14 +154,9 @@ public class ProfileListTab extends JScrollPane implements
 				ProfileListTab.this.deleteProfileButton
 						.setEnabled(hasSelection);
 			}
-
-			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-			}
-
-			public void popupMenuCanceled(PopupMenuEvent e) {
-			}
 		});
 		this.addProfileButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				Profile profile = new Profile();
 				profile.setName("New Profile");
@@ -91,6 +171,7 @@ public class ProfileListTab extends JScrollPane implements
 			}
 		});
 		this.copyProfileButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int selection = ProfileListTab.this.table.getSelectedRow();
 				if ((selection < 0)
@@ -98,7 +179,7 @@ public class ProfileListTab extends JScrollPane implements
 								.getRowCount()))
 					return;
 
-				Profile current = (Profile) dataModel.profiles.get(selection);
+				Profile current = dataModel.profiles.get(selection);
 				Profile copy = new Profile(current);
 				copy.setName("Copy of " + current.getName());
 
@@ -112,6 +193,7 @@ public class ProfileListTab extends JScrollPane implements
 			}
 		});
 		this.deleteProfileButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int selection = ProfileListTab.this.table.getSelectedRow();
 				if ((selection < 0)
@@ -119,7 +201,7 @@ public class ProfileListTab extends JScrollPane implements
 								.getRowCount()))
 					return;
 
-				Profile current = (Profile) dataModel.profiles.get(selection);
+				Profile current = dataModel.profiles.get(selection);
 
 				int result = JOptionPane.showOptionDialog(
 						ProfileListTab.this.launcher.getFrame(),
@@ -145,6 +227,7 @@ public class ProfileListTab extends JScrollPane implements
 			}
 		});
 		this.table.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					int row = ProfileListTab.this.table.getSelectedRow();
@@ -152,11 +235,12 @@ public class ProfileListTab extends JScrollPane implements
 					if ((row >= 0) && (row < dataModel.profiles.size()))
 						ProfileEditorPopup.showEditProfileDialog(
 								ProfileListTab.this.getLauncher(),
-								(Profile) (Profile) dataModel.profiles.get(row));
+								dataModel.profiles.get(row));
 				}
 			}
 
-			public void mouseReleased(MouseEvent e) {
+			@Override
+			public void mousePressed(MouseEvent e) {
 				if ((e.isPopupTrigger())
 						&& ((e.getComponent() instanceof JTable))) {
 					int r = ProfileListTab.this.table.rowAtPoint(e.getPoint());
@@ -172,7 +256,8 @@ public class ProfileListTab extends JScrollPane implements
 				}
 			}
 
-			public void mousePressed(MouseEvent e) {
+			@Override
+			public void mouseReleased(MouseEvent e) {
 				if ((e.isPopupTrigger())
 						&& ((e.getComponent() instanceof JTable))) {
 					int r = ProfileListTab.this.table.rowAtPoint(e.getPoint());
@@ -194,74 +279,14 @@ public class ProfileListTab extends JScrollPane implements
 		return this.launcher;
 	}
 
+	@Override
 	public void onProfilesRefreshed(ProfileManager manager) {
 		this.dataModel.setProfiles(manager.getProfiles().values());
 	}
 
+	@Override
 	public boolean shouldReceiveEventsInUIThread() {
 		return true;
-	}
-
-	private class ProfileTableModel extends AbstractTableModel {
-		private final List<Profile> profiles = new ArrayList<Profile>();
-
-		private ProfileTableModel() {
-		}
-
-		public int getRowCount() {
-			return this.profiles.size();
-		}
-
-		public int getColumnCount() {
-			return 3;
-		}
-
-		public Class<?> getColumnClass(int columnIndex) {
-			return String.class;
-		}
-
-		public String getColumnName(int column) {
-			switch (column) {
-			case 2:
-				return "Username";
-			case 1:
-				return "Version";
-			case 0:
-				return "Version name";
-			}
-			return super.getColumnName(column);
-		}
-
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			Profile profile = (Profile) this.profiles.get(rowIndex);
-			AuthenticationDatabase authDatabase = ProfileListTab.this.launcher
-					.getProfileManager().getAuthDatabase();
-			AuthenticationService auth = authDatabase.getByUUID(profile
-					.getPlayerUUID());
-
-			switch (columnIndex) {
-			case 0:
-				return profile.getName();
-			case 2:
-				if ((auth != null) && (auth.getSelectedProfile() != null)) {
-					return auth.getSelectedProfile().getName();
-				}
-				return "(Not logged in)";
-			case 1:
-				if (profile.getLastVersionId() == null) {
-					return "(Latest version)";
-				}
-				return profile.getLastVersionId();
-			}
-
-			return null;
-		}
-
-		public void setProfiles(Collection<Profile> profiles) {
-			this.profiles.clear();
-			this.profiles.addAll(profiles);
-			fireTableDataChanged();
-		}
 	}
 }
 

@@ -32,40 +32,48 @@ public class PartialVersion implements Version {
 				.getUpdatedTime(), version.getType());
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
 
-	public ReleaseType getType() {
-		return this.type;
-	}
-
-	public Date getUpdatedTime() {
-		return this.time;
-	}
-
-	public void setUpdatedTime(Date time) {
-		if (time == null)
-			throw new IllegalArgumentException("Time cannot be null");
-		this.time = time;
-	}
-
+	@Override
 	public Date getReleaseTime() {
 		return this.releaseTime;
 	}
 
+	@Override
+	public ReleaseType getType() {
+		return this.type;
+	}
+
+	@Override
+	public Date getUpdatedTime() {
+		return this.time;
+	}
+
+	@Override
 	public void setReleaseTime(Date time) {
 		if (time == null)
 			throw new IllegalArgumentException("Time cannot be null");
 		this.releaseTime = time;
 	}
 
+	@Override
 	public void setType(ReleaseType type) {
 		if (type == null)
 			throw new IllegalArgumentException("Release type cannot be null");
 		this.type = type;
 	}
 
+	@Override
+	public void setUpdatedTime(Date time) {
+		if (time == null)
+			throw new IllegalArgumentException("Time cannot be null");
+		this.time = time;
+	}
+
+	@Override
 	public String toString() {
 		return "PartialVersion{id='" + this.id + '\'' + ", updateTime="
 				+ this.time + ", releaseTime=" + this.releaseTime + ", type="

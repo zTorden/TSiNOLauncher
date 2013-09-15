@@ -1,6 +1,8 @@
 package net.minecraft.launcher.authentication.exceptions;
 
 public class AuthenticationException extends Exception {
+	private static final long serialVersionUID = 1L;
+
 	public AuthenticationException() {
 	}
 
@@ -16,9 +18,3 @@ public class AuthenticationException extends Exception {
 		super(cause);
 	}
 }
-
-/*
- * Location: Z:\home\vadim\.minecraft\launcher.jar Qualified Name:
- * net.minecraft.launcher.authentication.exceptions.AuthenticationException
- * JD-Core Version: 0.6.2
- */

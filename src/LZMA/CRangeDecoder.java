@@ -22,6 +22,30 @@ class CRangeDecoder {
 	int buffer_size;
 	int buffer_ind;
 
+	final static int kNumPosBitsMax = 4;
+
+	final static int kNumPosStatesMax = (1 << kNumPosBitsMax);
+
+	final static int kLenNumLowBits = 3;
+
+	final static int kLenNumLowSymbols = (1 << kLenNumLowBits);
+
+	final static int kLenNumMidBits = 3;
+
+	final static int kLenNumMidSymbols = (1 << kLenNumMidBits);
+
+	final static int kLenNumHighBits = 8;
+
+	final static int kLenNumHighSymbols = (1 << kLenNumHighBits);
+
+	final static int LenChoice = 0;
+	final static int LenChoice2 = (LenChoice + 1);
+
+	final static int LenLow = (LenChoice2 + 1);
+	final static int LenMid = (LenLow + (kNumPosStatesMax << kLenNumLowBits));
+	final static int LenHigh = (LenMid + (kNumPosStatesMax << kLenNumMidBits));
+	final static int kNumLenProbs = (LenHigh + kLenNumHighSymbols);
+
 	CRangeDecoder(InputStream iStream) throws IOException {
 		this.buffer = new byte[1 << 14];
 		this.inStream = iStream;
@@ -29,35 +53,6 @@ class CRangeDecoder {
 		this.Range = -1; // 0xFFFFFFFFL;
 		for (int i = 0; i < 5; i++)
 			this.Code = (this.Code << 8) | (Readbyte());
-	}
-
-	int Readbyte() throws IOException {
-		if (buffer_size == buffer_ind) {
-			buffer_size = inStream.read(buffer);
-			buffer_ind = 0;
-
-			if (buffer_size < 1)
-				throw new LzmaException("LZMA : Data Error");
-		}
-		return buffer[buffer_ind++] & 0xFF;
-	}
-
-	int DecodeDirectBits(int numTotalBits) throws IOException {
-		int result = 0;
-		for (int i = numTotalBits; i > 0; i--) {
-			Range >>>= 1;
-			int t = ((Code - Range) >>> 31);
-			Code -= Range & (t - 1);
-			result = (result << 1) | (1 - t);
-
-			if (Range < kTopValue) // because of "Range >>>= 1", 0 <= Range <=
-									// 0x7FFFFFFF
-			{
-				Code = (Code << 8) | Readbyte();
-				Range <<= 8;
-			}
-		}
-		return result;
 	}
 
 	int BitDecode(int prob[], int index) throws IOException {
@@ -94,17 +89,36 @@ class CRangeDecoder {
 		return mi - (1 << numLevels);
 	}
 
-	int ReverseBitTreeDecode(int probs[], int index, int numLevels)
-			throws IOException {
-		int mi = 1;
-		int symbol = 0;
+	int DecodeDirectBits(int numTotalBits) throws IOException {
+		int result = 0;
+		for (int i = numTotalBits; i > 0; i--) {
+			Range >>>= 1;
+			int t = ((Code - Range) >>> 31);
+			Code -= Range & (t - 1);
+			result = (result << 1) | (1 - t);
 
-		for (int i = 0; i < numLevels; i++) {
-			int bit = BitDecode(probs, index + mi);
-			mi = mi + mi + bit;
-			symbol |= (bit << i);
+			if (Range < kTopValue) // because of "Range >>>= 1", 0 <= Range <=
+									// 0x7FFFFFFF
+			{
+				Code = (Code << 8) | Readbyte();
+				Range <<= 8;
+			}
 		}
-		return symbol;
+		return result;
+	}
+
+	int LzmaLenDecode(int probs[], int index, int posState) throws IOException {
+		if (BitDecode(probs, index + LenChoice) == 0)
+			return BitTreeDecode(probs, index + LenLow
+					+ (posState << kLenNumLowBits), kLenNumLowBits);
+
+		if (BitDecode(probs, index + LenChoice2) == 0)
+			return kLenNumLowSymbols
+					+ BitTreeDecode(probs, index + LenMid
+							+ (posState << kLenNumMidBits), kLenNumMidBits);
+
+		return kLenNumLowSymbols + kLenNumMidSymbols
+				+ BitTreeDecode(probs, index + LenHigh, kLenNumHighBits);
 	}
 
 	byte LzmaLiteralDecode(int probs[], int index) throws IOException {
@@ -137,34 +151,27 @@ class CRangeDecoder {
 		return (byte) symbol;
 	}
 
-	final static int kNumPosBitsMax = 4;
-	final static int kNumPosStatesMax = (1 << kNumPosBitsMax);
+	int Readbyte() throws IOException {
+		if (buffer_size == buffer_ind) {
+			buffer_size = inStream.read(buffer);
+			buffer_ind = 0;
 
-	final static int kLenNumLowBits = 3;
-	final static int kLenNumLowSymbols = (1 << kLenNumLowBits);
-	final static int kLenNumMidBits = 3;
-	final static int kLenNumMidSymbols = (1 << kLenNumMidBits);
-	final static int kLenNumHighBits = 8;
-	final static int kLenNumHighSymbols = (1 << kLenNumHighBits);
+			if (buffer_size < 1)
+				throw new LzmaException("LZMA : Data Error");
+		}
+		return buffer[buffer_ind++] & 0xFF;
+	}
 
-	final static int LenChoice = 0;
-	final static int LenChoice2 = (LenChoice + 1);
-	final static int LenLow = (LenChoice2 + 1);
-	final static int LenMid = (LenLow + (kNumPosStatesMax << kLenNumLowBits));
-	final static int LenHigh = (LenMid + (kNumPosStatesMax << kLenNumMidBits));
-	final static int kNumLenProbs = (LenHigh + kLenNumHighSymbols);
+	int ReverseBitTreeDecode(int probs[], int index, int numLevels)
+			throws IOException {
+		int mi = 1;
+		int symbol = 0;
 
-	int LzmaLenDecode(int probs[], int index, int posState) throws IOException {
-		if (BitDecode(probs, index + LenChoice) == 0)
-			return BitTreeDecode(probs, index + LenLow
-					+ (posState << kLenNumLowBits), kLenNumLowBits);
-
-		if (BitDecode(probs, index + LenChoice2) == 0)
-			return kLenNumLowSymbols
-					+ BitTreeDecode(probs, index + LenMid
-							+ (posState << kLenNumMidBits), kLenNumMidBits);
-
-		return kLenNumLowSymbols + kLenNumMidSymbols
-				+ BitTreeDecode(probs, index + LenHigh, kLenNumHighBits);
+		for (int i = 0; i < numLevels; i++) {
+			int bit = BitDecode(probs, index + mi);
+			mi = mi + mi + bit;
+			symbol |= (bit << i);
+		}
+		return symbol;
 	}
 }

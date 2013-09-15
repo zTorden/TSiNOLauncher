@@ -24,14 +24,32 @@ import net.minecraft.launcher.LauncherConstants;
 import net.minecraft.launcher.OperatingSystem;
 
 public class LogInPopup extends JPanel implements ActionListener {
+	public static abstract interface Callback {
+		public abstract void onLogIn(String paramString);
+	}
+
 	private static final long serialVersionUID = 1L;
+
+	public static void showLoginPrompt(final Launcher launcher,
+			final Callback callback) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				LogInPopup popup = new LogInPopup(launcher, callback);
+				launcher.getLauncherPanel().setCard("login", popup);
+			}
+		});
+	}
+
 	private final Launcher launcher;
 	private final Callback callback;
 	private final AuthErrorForm errorForm;
 	private final ExistingUserListForm existingUserListForm;
 	private final LogInForm logInForm;
-	private final JButton loginButton = new JButton("Log In");
-	private final JButton registerButton = new JButton("Register");
+	private final JButton loginButton = new JButton("Вход");
+
+	private final JButton registerButton = new JButton("Регистрация");
+
 	private final JProgressBar progressBar = new JProgressBar();
 
 	public LogInPopup(Launcher launcher, Callback callback) {
@@ -46,6 +64,14 @@ public class LogInPopup extends JPanel implements ActionListener {
 
 		this.loginButton.addActionListener(this);
 		this.registerButton.addActionListener(this);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == this.loginButton)
+			this.logInForm.tryLogIn();
+		else if (e.getSource() == this.registerButton)
+			OperatingSystem.openLink(LauncherConstants.URL_REGISTER);
 	}
 
 	protected void createInterface() {
@@ -86,25 +112,26 @@ public class LogInPopup extends JPanel implements ActionListener {
 		add(this.progressBar);
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == this.loginButton)
-			this.logInForm.tryLogIn();
-		else if (e.getSource() == this.registerButton)
-			OperatingSystem.openLink(LauncherConstants.URL_REGISTER);
+	public AuthErrorForm getErrorForm() {
+		return this.errorForm;
 	}
 
-	public static void showLoginPrompt(final Launcher launcher,
-			final Callback callback) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				LogInPopup popup = new LogInPopup(launcher, callback);
-				launcher.getLauncherPanel().setCard("login", popup);
-			}
-		});
+	public ExistingUserListForm getExistingUserListForm() {
+		return this.existingUserListForm;
 	}
 
 	public Launcher getLauncher() {
 		return this.launcher;
+	}
+
+	public LogInForm getLogInForm() {
+		return this.logInForm;
+	}
+
+	public void repack() {
+		Window window = SwingUtilities.windowForComponent(this);
+		if (window != null)
+			window.pack();
 	}
 
 	public void setCanLogIn(final boolean enabled) {
@@ -116,6 +143,7 @@ public class LogInPopup extends JPanel implements ActionListener {
 			repack();
 		} else {
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					LogInPopup.this.setCanLogIn(enabled);
 				}
@@ -123,29 +151,7 @@ public class LogInPopup extends JPanel implements ActionListener {
 		}
 	}
 
-	public LogInForm getLogInForm() {
-		return this.logInForm;
-	}
-
-	public AuthErrorForm getErrorForm() {
-		return this.errorForm;
-	}
-
-	public ExistingUserListForm getExistingUserListForm() {
-		return this.existingUserListForm;
-	}
-
 	public void setLoggedIn(String uuid) {
 		this.callback.onLogIn(uuid);
-	}
-
-	public void repack() {
-		Window window = SwingUtilities.windowForComponent(this);
-		if (window != null)
-			window.pack();
-	}
-
-	public static abstract interface Callback {
-		public abstract void onLogIn(String paramString);
 	}
 }

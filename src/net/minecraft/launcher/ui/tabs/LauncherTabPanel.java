@@ -7,10 +7,15 @@ import javax.swing.JTabbedPane;
 import net.minecraft.launcher.Launcher;
 
 public class LauncherTabPanel extends JTabbedPane {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1850360775666476168L;
 	private final Launcher launcher;
 	private final WebsiteTab blog;
 	private final ConsoleTab console;
-	private CrashReportTab crashReportTab;
+	private final ProfileListTab profiles;
+	private final VersionListTab versions;
 
 	public LauncherTabPanel(Launcher launcher) {
 		super(1);
@@ -18,19 +23,15 @@ public class LauncherTabPanel extends JTabbedPane {
 		this.launcher = launcher;
 		this.blog = new WebsiteTab(launcher);
 		this.console = new ConsoleTab(launcher);
+		this.profiles = new ProfileListTab(launcher);
+		this.versions = new VersionListTab(launcher);
 
 		createInterface();
 	}
 
 	protected void createInterface() {
-		addTab("Update Notes", this.blog);
-		addTab("Development Console", this.console);
-		addTab("Profile Editor", new ProfileListTab(this.launcher));
-		addTab("Local Version Editor (NYI)", new VersionListTab(this.launcher));
-	}
-
-	public Launcher getLauncher() {
-		return this.launcher;
+		addTab("Новости", this.blog);
+		addTab("Консоль", this.console);
 	}
 
 	public WebsiteTab getBlog() {
@@ -41,16 +42,8 @@ public class LauncherTabPanel extends JTabbedPane {
 		return this.console;
 	}
 
-	public void showConsole() {
-		setSelectedComponent(this.console);
-	}
-
-	public void setCrashReport(CrashReportTab newTab) {
-		if (this.crashReportTab != null)
-			removeTab(this.crashReportTab);
-		this.crashReportTab = newTab;
-		addTab("Crash Report", this.crashReportTab);
-		setSelectedComponent(newTab);
+	public Launcher getLauncher() {
+		return this.launcher;
 	}
 
 	protected void removeTab(Component tab) {
@@ -59,6 +52,15 @@ public class LauncherTabPanel extends JTabbedPane {
 				removeTabAt(i);
 				break;
 			}
+	}
+
+	public void showAll() {
+		addTab("Profile Editor", this.profiles);
+		addTab("Local Version Editor (NYI)", this.versions);
+	}
+
+	public void showConsole() {
+		setSelectedComponent(this.console);
 	}
 }
 

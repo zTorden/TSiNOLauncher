@@ -40,9 +40,58 @@ public class ExistingUserListForm extends JPanel implements ActionListener {
 		this.logOutButton.addActionListener(this);
 	}
 
-	private void fillUsers() {
-		for (String user : this.authDatabase.getKnownNames())
-			this.userDropdown.addItem(user);
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		final Object selected = this.userDropdown.getSelectedItem();
+		final AuthenticationService auth;
+		final String uuid;
+		if ((selected != null) && ((selected instanceof String))) {
+			auth = this.authDatabase.getByName((String) selected);
+			if (auth.getSelectedProfile() == null)
+				uuid = "demo-" + auth.getUsername();
+			else
+				uuid = auth.getSelectedProfile().getId();
+		} else {
+			auth = null;
+			uuid = null;
+		}
+
+		if (e.getSource() == this.playButton) {
+			this.popup.setCanLogIn(false);
+
+			this.popup.getLauncher().getVersionManager().getExecutorService()
+					.execute(new Runnable() {
+						@Override
+						public void run() {
+							if ((auth != null) && (uuid != null))
+								try {
+									auth.logIn();
+									ExistingUserListForm.this.popup
+											.setLoggedIn(uuid);
+								} catch (AuthenticationException ex) {
+									ExistingUserListForm.this.popup
+											.getErrorForm()
+											.displayError(
+													new String[] {
+															"We couldn't log you back in as "
+																	+ selected
+																	+ ".",
+															"Please try to log in again." });
+
+									ExistingUserListForm.this.removeUser(
+											(String) selected, uuid);
+
+									ExistingUserListForm.this.popup
+											.setCanLogIn(true);
+								}
+							else
+								ExistingUserListForm.this.popup
+										.setCanLogIn(true);
+						}
+					});
+		} else if (e.getSource() == this.logOutButton) {
+			removeUser((String) selected, uuid);
+		}
 	}
 
 	protected void createInterface() {
@@ -96,61 +145,15 @@ public class ExistingUserListForm extends JPanel implements ActionListener {
 		add(new JPopupMenu.Separator(), constraints);
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		final Object selected = this.userDropdown.getSelectedItem();
-		final AuthenticationService auth;
-		final String uuid;
-		if ((selected != null) && ((selected instanceof String))) {
-			auth = this.authDatabase.getByName((String) selected);
-			if (auth.getSelectedProfile() == null)
-				uuid = "demo-" + auth.getUsername();
-			else
-				uuid = auth.getSelectedProfile().getId();
-		} else {
-			auth = null;
-			uuid = null;
-		}
-
-		if (e.getSource() == this.playButton) {
-			this.popup.setCanLogIn(false);
-
-			this.popup.getLauncher().getVersionManager().getExecutorService()
-					.execute(new Runnable() {
-						public void run() {
-							if ((auth != null) && (uuid != null))
-								try {
-									auth.logIn();
-									ExistingUserListForm.this.popup
-											.setLoggedIn(uuid);
-								} catch (AuthenticationException ex) {
-									ExistingUserListForm.this.popup
-											.getErrorForm()
-											.displayError(
-													new String[] {
-															"We couldn't log you back in as "
-																	+ selected
-																	+ ".",
-															"Please try to log in again." });
-
-									ExistingUserListForm.this.removeUser(
-											(String) selected, uuid);
-
-									ExistingUserListForm.this.popup
-											.setCanLogIn(true);
-								}
-							else
-								ExistingUserListForm.this.popup
-										.setCanLogIn(true);
-						}
-					});
-		} else if (e.getSource() == this.logOutButton) {
-			removeUser((String) selected, uuid);
-		}
+	private void fillUsers() {
+		for (String user : this.authDatabase.getKnownNames())
+			this.userDropdown.addItem(user);
 	}
 
 	protected void removeUser(final String name, final String uuid) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					ExistingUserListForm.this.removeUser(name, uuid);
 				}

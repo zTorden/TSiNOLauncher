@@ -21,22 +21,6 @@ public class JavaProcessLauncher {
 		addCommands(commands);
 	}
 
-	public JavaProcess start() throws IOException {
-		List<String> full = getFullCommands();
-		return new JavaProcess(full, new ProcessBuilder(full)
-				.directory(this.directory).redirectErrorStream(true).start());
-	}
-
-	public List<String> getFullCommands() {
-		List<String> result = new ArrayList<String>(this.commands);
-		result.add(0, getJavaPath());
-		return result;
-	}
-
-	public List<String> getCommands() {
-		return this.commands;
-	}
-
 	public void addCommands(String[] commands) {
 		this.commands.addAll(Arrays.asList(commands));
 	}
@@ -51,14 +35,31 @@ public class JavaProcessLauncher {
 		return this;
 	}
 
+	public List<String> getCommands() {
+		return this.commands;
+	}
+
 	public File getDirectory() {
 		return this.directory;
+	}
+
+	public List<String> getFullCommands() {
+		List<String> result = new ArrayList<String>(this.commands);
+		result.add(0, getJavaPath());
+		return result;
 	}
 
 	protected String getJavaPath() {
 		return this.jvmPath;
 	}
 
+	public JavaProcess start() throws IOException {
+		List<String> full = getFullCommands();
+		return new JavaProcess(full, new ProcessBuilder(full)
+				.directory(this.directory).redirectErrorStream(true).start());
+	}
+
+	@Override
 	public String toString() {
 		return "JavaProcessLauncher[commands=" + this.commands + ", java="
 				+ this.jvmPath + "]";

@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import net.minecraft.launcher.Launcher;
+import net.minecraft.launcher.LauncherConstants;
 import net.minecraft.launcher.ui.tabs.LauncherTabPanel;
 
 public class LauncherPanel extends JPanel {
@@ -37,6 +38,10 @@ public class LauncherPanel extends JPanel {
 		createInterface();
 	}
 
+	protected JPanel createDirtInterface() {
+		return new TexturedPanel("/dirt.png");
+	}
+
 	protected void createInterface() {
 		add(createLauncherInterface(), "launcher");
 		add(createDirtInterface(), "loading");
@@ -46,7 +51,7 @@ public class LauncherPanel extends JPanel {
 	protected JPanel createLauncherInterface() {
 		JPanel result = new JPanel(new BorderLayout());
 
-		this.tabPanel.getBlog().setPage("http://mcupdate.tumblr.com");
+		this.tabPanel.getBlog().setPage(LauncherConstants.URL_BLOG);
 
 		JPanel topWrapper = new JPanel();
 		topWrapper.setLayout(new BorderLayout());
@@ -63,29 +68,25 @@ public class LauncherPanel extends JPanel {
 		return result;
 	}
 
-	protected JPanel createDirtInterface() {
-		return new TexturedPanel("/dirt.png");
-	}
-
 	protected JPanel createLoginInterface() {
 		this.loginPanel.setLayout(new GridBagLayout());
 		return this.loginPanel;
-	}
-
-	public LauncherTabPanel getTabPanel() {
-		return this.tabPanel;
 	}
 
 	public BottomBarPanel getBottomBar() {
 		return this.bottomBar;
 	}
 
+	public Launcher getLauncher() {
+		return this.launcher;
+	}
+
 	public JProgressBar getProgressBar() {
 		return this.progressBar;
 	}
 
-	public Launcher getLauncher() {
-		return this.launcher;
+	public LauncherTabPanel getTabPanel() {
+		return this.tabPanel;
 	}
 
 	public void setCard(String card, JPanel additional) {

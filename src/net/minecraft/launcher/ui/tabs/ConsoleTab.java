@@ -12,6 +12,11 @@ import javax.swing.text.Document;
 import net.minecraft.launcher.Launcher;
 
 public class ConsoleTab extends JScrollPane {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6076752381005959522L;
+
 	private static final Font MONOSPACED = new Font("Monospaced", 0, 12);
 
 	private final JTextPane console = new JTextPane();
@@ -34,6 +39,7 @@ public class ConsoleTab extends JScrollPane {
 	public void print(final String line) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					ConsoleTab.this.print(line);
 				}

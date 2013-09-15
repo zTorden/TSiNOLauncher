@@ -7,7 +7,7 @@ public class JavaProcess {
 	private final List<String> commands;
 	private final Process process;
 	private final LimitedCapacityList<String> sysOutLines = new LimitedCapacityList<String>(
-			String.class, 5);
+			String.class, MAX_SYSOUT_LINES);
 	private JavaProcessRunnable onExit;
 	private ProcessMonitorThread monitor = new ProcessMonitorThread(this);
 
@@ -18,16 +18,29 @@ public class JavaProcess {
 		this.monitor.start();
 	}
 
+	public int getExitCode() {
+		try {
+			return this.process.exitValue();
+		} catch (IllegalThreadStateException ex) {
+			ex.fillInStackTrace();
+			throw ex;
+		}
+	}
+
+	public JavaProcessRunnable getExitRunnable() {
+		return this.onExit;
+	}
+
 	public Process getRawProcess() {
 		return this.process;
 	}
 
-	public List<String> getStartupCommands() {
-		return this.commands;
-	}
-
 	public String getStartupCommand() {
 		return this.process.toString();
+	}
+
+	public List<String> getStartupCommands() {
+		return this.commands;
 	}
 
 	public LimitedCapacityList<String> getSysOutLines() {
@@ -44,10 +57,6 @@ public class JavaProcess {
 		return false;
 	}
 
-	public void setExitRunnable(JavaProcessRunnable runnable) {
-		this.onExit = runnable;
-	}
-
 	public void safeSetExitRunnable(JavaProcessRunnable runnable) {
 		setExitRunnable(runnable);
 
@@ -55,26 +64,18 @@ public class JavaProcess {
 			runnable.onJavaProcessEnded(this);
 	}
 
-	public JavaProcessRunnable getExitRunnable() {
-		return this.onExit;
-	}
-
-	public int getExitCode() {
-		try {
-			return this.process.exitValue();
-		} catch (IllegalThreadStateException ex) {
-			ex.fillInStackTrace();
-			throw ex;
-		}
-	}
-
-	public String toString() {
-		return "JavaProcess[commands=" + this.commands + ", isRunning="
-				+ isRunning() + "]";
+	public void setExitRunnable(JavaProcessRunnable runnable) {
+		this.onExit = runnable;
 	}
 
 	public void stop() {
 		this.process.destroy();
+	}
+
+	@Override
+	public String toString() {
+		return "JavaProcess[commands=" + this.commands + ", isRunning="
+				+ isRunning() + "]";
 	}
 }
 

@@ -5,6 +5,7 @@ import java.net.Proxy;
 import java.net.URL;
 
 import net.minecraft.launcher.Http;
+import net.minecraft.launcher.LauncherConstants;
 import net.minecraft.launcher.OperatingSystem;
 import net.minecraft.launcher.versions.CompleteVersion;
 
@@ -15,18 +16,19 @@ public class RemoteVersionList extends VersionList {
 		this.proxy = proxy;
 	}
 
-	public boolean hasAllFiles(CompleteVersion version, OperatingSystem os) {
-		return true;
-	}
-
+	@Override
 	protected String getContent(String path) throws IOException {
-		return Http.performGet(new URL(
-				"https://s3.amazonaws.com/Minecraft.Download/" + path),
-				this.proxy);
+		return Http.performGet(new URL(LauncherConstants.URL_DOWNLOAD_BASE
+				+ path), this.proxy);
 	}
 
 	public Proxy getProxy() {
 		return this.proxy;
+	}
+
+	@Override
+	public boolean hasAllFiles(CompleteVersion version, OperatingSystem os) {
+		return true;
 	}
 }
 

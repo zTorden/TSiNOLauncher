@@ -31,6 +31,12 @@ public class CompleteVersion implements Version {
 	public CompleteVersion() {
 	}
 
+	public CompleteVersion(CompleteVersion version) {
+		this(version.getId(), version.getReleaseTime(), version
+				.getUpdatedTime(), version.getType(), version.getMainClass(),
+				version.getMinecraftArguments());
+	}
+
 	public CompleteVersion(String id, Date releaseTime, Date updateTime,
 			ReleaseType type, String mainClass, String minecraftArguments) {
 		if ((id == null) || (id.length() == 0))
@@ -57,12 +63,6 @@ public class CompleteVersion implements Version {
 		this.minecraftArguments = minecraftArguments;
 	}
 
-	public CompleteVersion(CompleteVersion version) {
-		this(version.getId(), version.getReleaseTime(), version
-				.getUpdatedTime(), version.getType(), version.getMainClass(),
-				version.getMinecraftArguments());
-	}
-
 	public CompleteVersion(Version version, String mainClass,
 			String minecraftArguments) {
 		this(version.getId(), version.getReleaseTime(), version
@@ -70,65 +70,18 @@ public class CompleteVersion implements Version {
 				minecraftArguments);
 	}
 
-	public String getId() {
-		return this.id;
-	}
+	public boolean appliesToCurrentEnvironment() {
+		if (this.rules == null)
+			return true;
+		Rule.Action lastAction = Rule.Action.DISALLOW;
 
-	public ReleaseType getType() {
-		return this.type;
-	}
-
-	public Date getUpdatedTime() {
-		return this.time;
-	}
-
-	public Date getReleaseTime() {
-		return this.releaseTime;
-	}
-
-	public Collection<Library> getLibraries() {
-		return this.libraries;
-	}
-
-	public String getMainClass() {
-		return this.mainClass;
-	}
-
-	public void setUpdatedTime(Date time) {
-		if (time == null)
-			throw new IllegalArgumentException("Time cannot be null");
-		this.time = time;
-	}
-
-	public void setReleaseTime(Date time) {
-		if (time == null)
-			throw new IllegalArgumentException("Time cannot be null");
-		this.releaseTime = time;
-	}
-
-	public void setType(ReleaseType type) {
-		if (type == null)
-			throw new IllegalArgumentException("Release type cannot be null");
-		this.type = type;
-	}
-
-	public void setMainClass(String mainClass) {
-		if ((mainClass == null) || (mainClass.length() == 0))
-			throw new IllegalArgumentException(
-					"Main class cannot be null or empty");
-		this.mainClass = mainClass;
-	}
-
-	public Collection<Library> getRelevantLibraries() {
-		List<Library> result = new ArrayList<Library>();
-
-		for (Library library : this.libraries) {
-			if (library.appliesToCurrentEnvironment()) {
-				result.add(library);
-			}
+		for (Rule rule : this.rules) {
+			Rule.Action action = rule.getAppliedAction();
+			if (action != null)
+				lastAction = action;
 		}
 
-		return result;
+		return lastAction == Rule.Action.ALLOW;
 	}
 
 	public Collection<File> getClassPath(OperatingSystem os, File base) {
@@ -157,29 +110,53 @@ public class CompleteVersion implements Version {
 
 			if ((natives != null) && (natives.containsKey(os))) {
 				result.add("libraries/"
-						+ library.getArtifactPath((String) natives.get(os)));
+						+ library.getArtifactPath(natives.get(os)));
 			}
 		}
 
 		return result;
 	}
 
-	public Set<String> getRequiredFiles(OperatingSystem os) {
-		Set<String> neededFiles = new HashSet<String>();
+	@Override
+	public String getId() {
+		return this.id;
+	}
 
-		for (Library library : getRelevantLibraries()) {
-			if (library.getNatives() != null) {
-				String natives = (String) library.getNatives().get(os);
-				if (natives != null)
-					neededFiles.add("libraries/"
-							+ library.getArtifactPath(natives));
-			} else {
-				neededFiles.add("libraries/" + library.getArtifactPath());
+	public String getIncompatibilityReason() {
+		return this.incompatibilityReason;
+	}
+
+	public Collection<Library> getLibraries() {
+		return this.libraries;
+	}
+
+	public String getMainClass() {
+		return this.mainClass;
+	}
+
+	public String getMinecraftArguments() {
+		return this.minecraftArguments;
+	}
+
+	public int getMinimumLauncherVersion() {
+		return this.minimumLauncherVersion;
+	}
+
+	@Override
+	public Date getReleaseTime() {
+		return this.releaseTime;
+	}
+
+	public Collection<Library> getRelevantLibraries() {
+		List<Library> result = new ArrayList<Library>();
+
+		for (Library library : this.libraries) {
+			if (library.appliesToCurrentEnvironment()) {
+				result.add(library);
 			}
-
 		}
 
-		return neededFiles;
+		return result;
 	}
 
 	public Set<Downloadable> getRequiredDownloadables(OperatingSystem os,
@@ -191,7 +168,7 @@ public class CompleteVersion implements Version {
 			String file = null;
 
 			if (library.getNatives() != null) {
-				String natives = (String) library.getNatives().get(os);
+				String natives = library.getNatives().get(os);
 				if (natives != null)
 					file = library.getArtifactPath(natives);
 			} else {
@@ -212,16 +189,43 @@ public class CompleteVersion implements Version {
 		return neededFiles;
 	}
 
-	public String toString() {
-		return "CompleteVersion{id='" + this.id + '\'' + ", time=" + this.time
-				+ ", type=" + this.type + ", libraries=" + this.libraries
-				+ ", mainClass='" + this.mainClass + '\''
-				+ ", minimumLauncherVersion=" + this.minimumLauncherVersion
-				+ '}';
+	public Set<String> getRequiredFiles(OperatingSystem os) {
+		Set<String> neededFiles = new HashSet<String>();
+
+		for (Library library : getRelevantLibraries()) {
+			if (library.getNatives() != null) {
+				String natives = library.getNatives().get(os);
+				if (natives != null)
+					neededFiles.add("libraries/"
+							+ library.getArtifactPath(natives));
+			} else {
+				neededFiles.add("libraries/" + library.getArtifactPath());
+			}
+
+		}
+
+		return neededFiles;
 	}
 
-	public String getMinecraftArguments() {
-		return this.minecraftArguments;
+	@Override
+	public ReleaseType getType() {
+		return this.type;
+	}
+
+	@Override
+	public Date getUpdatedTime() {
+		return this.time;
+	}
+
+	public boolean isSynced() {
+		return this.synced;
+	}
+
+	public void setMainClass(String mainClass) {
+		if ((mainClass == null) || (mainClass.length() == 0))
+			throw new IllegalArgumentException(
+					"Main class cannot be null or empty");
+		this.mainClass = mainClass;
 	}
 
 	public void setMinecraftArguments(String minecraftArguments) {
@@ -231,38 +235,42 @@ public class CompleteVersion implements Version {
 		this.minecraftArguments = minecraftArguments;
 	}
 
-	public int getMinimumLauncherVersion() {
-		return this.minimumLauncherVersion;
-	}
-
 	public void setMinimumLauncherVersion(int minimumLauncherVersion) {
 		this.minimumLauncherVersion = minimumLauncherVersion;
 	}
 
-	public boolean appliesToCurrentEnvironment() {
-		if (this.rules == null)
-			return true;
-		Rule.Action lastAction = Rule.Action.DISALLOW;
-
-		for (Rule rule : this.rules) {
-			Rule.Action action = rule.getAppliedAction();
-			if (action != null)
-				lastAction = action;
-		}
-
-		return lastAction == Rule.Action.ALLOW;
-	}
-
-	public String getIncompatibilityReason() {
-		return this.incompatibilityReason;
-	}
-
-	public boolean isSynced() {
-		return this.synced;
+	@Override
+	public void setReleaseTime(Date time) {
+		if (time == null)
+			throw new IllegalArgumentException("Time cannot be null");
+		this.releaseTime = time;
 	}
 
 	public void setSynced(boolean synced) {
 		this.synced = synced;
+	}
+
+	@Override
+	public void setType(ReleaseType type) {
+		if (type == null)
+			throw new IllegalArgumentException("Release type cannot be null");
+		this.type = type;
+	}
+
+	@Override
+	public void setUpdatedTime(Date time) {
+		if (time == null)
+			throw new IllegalArgumentException("Time cannot be null");
+		this.time = time;
+	}
+
+	@Override
+	public String toString() {
+		return "CompleteVersion{id='" + this.id + '\'' + ", time=" + this.time
+				+ ", type=" + this.type + ", libraries=" + this.libraries
+				+ ", mainClass='" + this.mainClass + '\''
+				+ ", minimumLauncherVersion=" + this.minimumLauncherVersion
+				+ '}';
 	}
 }
 

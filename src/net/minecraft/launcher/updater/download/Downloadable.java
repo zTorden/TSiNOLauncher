@@ -1,27 +1,28 @@
 package net.minecraft.launcher.updater.download;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import net.minecraft.bootstrap.EtagDatabase;
+
 public class Downloadable {
+	public static String getEtag(HttpURLConnection connection) {
+		return EtagDatabase.formatEtag(connection.getHeaderField("ETag"));
+	}
+
 	private final URL url;
 	private final File target;
 	private final boolean forceDownload;
 	private final Proxy proxy;
 	private final ProgressContainer monitor;
 	private int numAttempts;
+
 	private long expectedSize;
 
 	public Downloadable(Proxy proxy, URL remoteFile, File localFile,
@@ -33,20 +34,8 @@ public class Downloadable {
 		this.monitor = new ProgressContainer();
 	}
 
-	public ProgressContainer getMonitor() {
-		return this.monitor;
-	}
-
-	public long getExpectedSize() {
-		return this.expectedSize;
-	}
-
-	public void setExpectedSize(long expectedSize) {
-		this.expectedSize = expectedSize;
-	}
-
 	public String download() throws IOException {
-		String localMd5 = null;
+		String localEtag = null;
 		this.numAttempts += 1;
 
 		if ((this.target.getParentFile() != null)
@@ -54,7 +43,7 @@ public class Downloadable {
 			this.target.getParentFile().mkdirs();
 		}
 		if ((!this.forceDownload) && (this.target.isFile())) {
-			localMd5 = getMD5(this.target);
+			localEtag = EtagDatabase.getInstance().getEtag(this.target);
 		}
 
 		if ((this.target.isFile()) && (!this.target.canWrite())) {
@@ -62,7 +51,7 @@ public class Downloadable {
 					+ this.target + " - aborting!");
 		}
 		try {
-			HttpURLConnection connection = makeConnection(localMd5);
+			HttpURLConnection connection = makeConnection(localEtag);
 			int status = connection.getResponseCode();
 
 			if (status == 304)
@@ -78,19 +67,15 @@ public class Downloadable {
 						connection.getInputStream(), this.monitor);
 				FileOutputStream outputStream = new FileOutputStream(
 						this.target);
-				String md5 = copyAndDigest(inputStream, outputStream);
+				String hash = EtagDatabase.copyAndDigest(inputStream,
+						outputStream);
 				String etag = getEtag(connection);
 
-				if (etag.contains("-")) {
+				if (etag.equals("-")) {
 					return "Didn't have etag so assuming our copy is good";
 				}
-				if (etag.equalsIgnoreCase(md5)) {
-					return "Downloaded successfully and etag matched";
-				}
-				throw new RuntimeException(
-						String.format(
-								"E-tag did not match downloaded MD5 (ETag was %s, downloaded %s)",
-								new Object[] { etag, md5 }));
+				EtagDatabase.getInstance().setEtag(target, etag, hash);
+				return "Downloaded succsessfully";
 			}
 			if (this.target.isFile()) {
 				return "Couldn't connect to server (responded with " + status
@@ -109,35 +94,12 @@ public class Downloadable {
 		}
 	}
 
-	protected HttpURLConnection makeConnection(String localMd5)
-			throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) this.url
-				.openConnection(this.proxy);
-
-		connection.setUseCaches(false);
-		connection.setDefaultUseCaches(false);
-		connection.setRequestProperty("Cache-Control",
-				"no-store,max-age=0,no-cache");
-		connection.setRequestProperty("Expires", "0");
-		connection.setRequestProperty("Pragma", "no-cache");
-		if (localMd5 != null)
-			connection.setRequestProperty("If-None-Match", localMd5);
-
-		connection.connect();
-
-		return connection;
+	public long getExpectedSize() {
+		return this.expectedSize;
 	}
 
-	public URL getUrl() {
-		return this.url;
-	}
-
-	public File getTarget() {
-		return this.target;
-	}
-
-	public boolean shouldIgnoreLocal() {
-		return this.forceDownload;
+	public ProgressContainer getMonitor() {
+		return this.monitor;
 	}
 
 	public int getNumAttempts() {
@@ -148,68 +110,43 @@ public class Downloadable {
 		return this.proxy;
 	}
 
-	public static String getMD5(File file) {
-		DigestInputStream stream = null;
-		try {
-			stream = new DigestInputStream(new FileInputStream(file),
-					MessageDigest.getInstance("MD5"));
-			byte[] buffer = new byte[65536];
-
-			int read = stream.read(buffer);
-			while (read >= 1)
-				read = stream.read(buffer);
-		} catch (Exception ignored) {
-			return null;
-		} finally {
-			closeSilently(stream);
-		}
-
-		return String.format("%1$032x", new Object[] { new BigInteger(1, stream
-				.getMessageDigest().digest()) });
+	public File getTarget() {
+		return this.target;
 	}
 
-	public static void closeSilently(Closeable closeable) {
-		if (closeable != null)
-			try {
-				closeable.close();
-			} catch (IOException localIOException) {
-			}
+	public URL getUrl() {
+		return this.url;
 	}
 
-	public static String copyAndDigest(InputStream inputStream,
-			OutputStream outputStream) throws IOException,
-			NoSuchAlgorithmException {
-		MessageDigest digest = MessageDigest.getInstance("MD5");
-		byte[] buffer = new byte[65536];
-		try {
-			int read = inputStream.read(buffer);
-			while (read >= 1) {
-				digest.update(buffer, 0, read);
-				outputStream.write(buffer, 0, read);
-				read = inputStream.read(buffer);
-			}
-		} finally {
-			closeSilently(inputStream);
-			closeSilently(outputStream);
-		}
+	protected HttpURLConnection makeConnection(String localEtag)
+			throws IOException {
+		HttpURLConnection connection = (HttpURLConnection) this.url
+				.openConnection(this.proxy);
+		connection.setConnectTimeout(15000);
+		connection.setReadTimeout(60000);
+		connection.setUseCaches(false);
+		connection.setDefaultUseCaches(false);
+		connection.setRequestProperty("Cache-Control",
+				"no-store,max-age=0,no-cache");
+		connection.setRequestProperty("Expires", "0");
+		connection.setRequestProperty("Pragma", "no-cache");
+		if (localEtag != null)
+			connection.setRequestProperty("If-None-Match", "\"" + localEtag
+					+ "\"");
 
-		return String.format("%1$032x",
-				new Object[] { new BigInteger(1, digest.digest()) });
+		connection.connect();
+
+		return connection;
 	}
 
-	public static String getEtag(HttpURLConnection connection) {
-		return getEtag(connection.getHeaderField("ETag"));
+	public void setExpectedSize(long expectedSize) {
+		this.expectedSize = expectedSize;
 	}
 
-	public static String getEtag(String etag) {
-		if (etag == null)
-			etag = "-";
-		else if ((etag.startsWith("\"")) && (etag.endsWith("\""))) {
-			etag = etag.substring(1, etag.length() - 1);
-		}
-
-		return etag;
+	public boolean shouldIgnoreLocal() {
+		return this.forceDownload;
 	}
+
 }
 
 /*

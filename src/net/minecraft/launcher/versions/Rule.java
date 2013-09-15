@@ -6,20 +6,6 @@ import java.util.regex.Pattern;
 import net.minecraft.launcher.OperatingSystem;
 
 public class Rule {
-	private Action action = Action.ALLOW;
-	private OSRestriction os;
-
-	public Action getAppliedAction() {
-		if ((this.os != null) && (!this.os.isCurrentOperatingSystem()))
-			return null;
-
-		return this.action;
-	}
-
-	public String toString() {
-		return "Rule{action=" + this.action + ", os=" + this.os + '}';
-	}
-
 	public static enum Action {
 		ALLOW, DISALLOW;
 	}
@@ -48,10 +34,27 @@ public class Rule {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "OSRestriction{name=" + this.name + ", version='"
 					+ this.version + '\'' + '}';
 		}
+	}
+
+	private Action action = Action.ALLOW;
+
+	private OSRestriction os;
+
+	public Action getAppliedAction() {
+		if ((this.os != null) && (!this.os.isCurrentOperatingSystem()))
+			return null;
+
+		return this.action;
+	}
+
+	@Override
+	public String toString() {
+		return "Rule{action=" + this.action + ", os=" + this.os + '}';
 	}
 }
 

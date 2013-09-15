@@ -20,6 +20,21 @@ import net.minecraft.launcher.profile.Profile;
 import net.minecraft.launcher.profile.ProfileManager;
 
 public class ProfileEditorPopup extends JPanel implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8971703740777032255L;
+
+	public static void showEditProfileDialog(Launcher launcher, Profile profile) {
+		JDialog dialog = new JDialog(launcher.getFrame(), "Profile Editor",
+				true);
+		ProfileEditorPopup editor = new ProfileEditorPopup(launcher, profile);
+		dialog.add(editor);
+		dialog.pack();
+		dialog.setLocationRelativeTo(launcher.getFrame());
+		dialog.setVisible(true);
+	}
+
 	private final Launcher launcher;
 	private final Profile originalProfile;
 	private final Profile profile;
@@ -27,6 +42,7 @@ public class ProfileEditorPopup extends JPanel implements ActionListener {
 	private final JButton cancelButton = new JButton("Cancel");
 	private final ProfileInfoPanel profileInfoPanel;
 	private final ProfileVersionPanel profileVersionPanel;
+
 	private final ProfileJavaPanel javaInfoPanel;
 
 	public ProfileEditorPopup(Launcher launcher, Profile profile) {
@@ -47,23 +63,7 @@ public class ProfileEditorPopup extends JPanel implements ActionListener {
 		createInterface();
 	}
 
-	protected void createInterface() {
-		JPanel standardPanels = new JPanel(true);
-		standardPanels.setLayout(new BoxLayout(standardPanels, 1));
-		standardPanels.add(this.profileInfoPanel);
-		standardPanels.add(this.profileVersionPanel);
-		standardPanels.add(this.javaInfoPanel);
-
-		add(standardPanels, "Center");
-
-		JPanel buttonPannel = new JPanel();
-		buttonPannel.setLayout(new BoxLayout(buttonPannel, 0));
-		buttonPannel.add(this.cancelButton);
-		buttonPannel.add(Box.createGlue());
-		buttonPannel.add(this.saveButton);
-		add(buttonPannel, "South");
-	}
-
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == this.saveButton) {
 			try {
@@ -93,22 +93,29 @@ public class ProfileEditorPopup extends JPanel implements ActionListener {
 		window.dispatchEvent(new WindowEvent(window, 201));
 	}
 
+	protected void createInterface() {
+		JPanel standardPanels = new JPanel(true);
+		standardPanels.setLayout(new BoxLayout(standardPanels, 1));
+		standardPanels.add(this.profileInfoPanel);
+		standardPanels.add(this.profileVersionPanel);
+		standardPanels.add(this.javaInfoPanel);
+
+		add(standardPanels, "Center");
+
+		JPanel buttonPannel = new JPanel();
+		buttonPannel.setLayout(new BoxLayout(buttonPannel, 0));
+		buttonPannel.add(this.cancelButton);
+		buttonPannel.add(Box.createGlue());
+		buttonPannel.add(this.saveButton);
+		add(buttonPannel, "South");
+	}
+
 	public Launcher getLauncher() {
 		return this.launcher;
 	}
 
 	public Profile getProfile() {
 		return this.profile;
-	}
-
-	public static void showEditProfileDialog(Launcher launcher, Profile profile) {
-		JDialog dialog = new JDialog(launcher.getFrame(), "Profile Editor",
-				true);
-		ProfileEditorPopup editor = new ProfileEditorPopup(launcher, profile);
-		dialog.add(editor);
-		dialog.pack();
-		dialog.setLocationRelativeTo(launcher.getFrame());
-		dialog.setVisible(true);
 	}
 }
 

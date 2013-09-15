@@ -18,8 +18,12 @@ import net.minecraft.launcher.updater.VersionManager;
 
 public class PlayButtonPanel extends JPanel implements
 		RefreshedProfilesListener, RefreshedVersionsListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6719881689813565300L;
 	private final Launcher launcher;
-	private final JButton playButton = new JButton("Play");
+	private final JButton playButton = new JButton("Старт");
 
 	public PlayButtonPanel(Launcher launcher) {
 		this.launcher = launcher;
@@ -29,9 +33,11 @@ public class PlayButtonPanel extends JPanel implements
 		createInterface();
 
 		this.playButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				PlayButtonPanel.this.getLauncher().getVersionManager()
 						.getExecutorService().submit(new Runnable() {
+							@Override
 							public void run() {
 								PlayButtonPanel.this.getLauncher()
 										.getGameLauncher().playGame();
@@ -39,6 +45,35 @@ public class PlayButtonPanel extends JPanel implements
 						});
 			}
 		});
+	}
+
+	public void checkState() {
+		Profile profile = this.launcher.getProfileManager().getProfiles()
+				.isEmpty() ? null : this.launcher.getProfileManager()
+				.getSelectedProfile();
+		AuthenticationService auth = profile == null ? null : this.launcher
+				.getProfileManager().getAuthDatabase()
+				.getByUUID(profile.getPlayerUUID());
+
+		if ((auth == null)
+				|| (!auth.isLoggedIn())
+				|| (this.launcher.getVersionManager().getVersions(
+						profile.getVersionFilter()).isEmpty())) {
+			this.playButton.setEnabled(false);
+			this.playButton.setText("Старт");
+		} else if (auth.getSelectedProfile() == null) {
+			this.playButton.setEnabled(true);
+			this.playButton.setText("Старт");
+		} else if (auth.canPlayOnline()) {
+			this.playButton.setEnabled(true);
+			this.playButton.setText("Старт");
+		} else {
+			this.playButton.setEnabled(true);
+			this.playButton.setText("Старт");
+		}
+
+		if (this.launcher.getGameLauncher().isWorking())
+			this.playButton.setEnabled(false);
 	}
 
 	protected void createInterface() {
@@ -56,49 +91,23 @@ public class PlayButtonPanel extends JPanel implements
 				this.playButton.getFont().getSize() + 2));
 	}
 
+	public Launcher getLauncher() {
+		return this.launcher;
+	}
+
+	@Override
 	public void onProfilesRefreshed(ProfileManager manager) {
 		checkState();
 	}
 
-	public void checkState() {
-		Profile profile = this.launcher.getProfileManager().getProfiles()
-				.isEmpty() ? null : this.launcher.getProfileManager()
-				.getSelectedProfile();
-		AuthenticationService auth = profile == null ? null : this.launcher
-				.getProfileManager().getAuthDatabase()
-				.getByUUID(profile.getPlayerUUID());
-
-		if ((auth == null)
-				|| (!auth.isLoggedIn())
-				|| (this.launcher.getVersionManager().getVersions(
-						profile.getVersionFilter()).isEmpty())) {
-			this.playButton.setEnabled(false);
-			this.playButton.setText("Play");
-		} else if (auth.getSelectedProfile() == null) {
-			this.playButton.setEnabled(true);
-			this.playButton.setText("Play Demo");
-		} else if (auth.canPlayOnline()) {
-			this.playButton.setEnabled(true);
-			this.playButton.setText("Play");
-		} else {
-			this.playButton.setEnabled(true);
-			this.playButton.setText("Play Offline");
-		}
-
-		if (this.launcher.getGameLauncher().isWorking())
-			this.playButton.setEnabled(false);
-	}
-
+	@Override
 	public void onVersionsRefreshed(VersionManager manager) {
 		checkState();
 	}
 
+	@Override
 	public boolean shouldReceiveEventsInUIThread() {
 		return true;
-	}
-
-	public Launcher getLauncher() {
-		return this.launcher;
 	}
 }
 

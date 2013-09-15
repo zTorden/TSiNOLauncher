@@ -67,6 +67,32 @@ public class LzmaInputStream extends java.io.FilterInputStream {
 		fill_buffer();
 	}
 
+	@Override
+	public void close() throws IOException {
+		isClosed = true;
+		super.close();
+	}
+
+	private void fill_buffer() throws IOException {
+		if (GlobalNowPos < GlobalOutSize) {
+			uncompressed_offset = 0;
+			long lblockSize = GlobalOutSize - GlobalNowPos;
+			int blockSize;
+			if (lblockSize > kBlockSize)
+				blockSize = kBlockSize;
+			else
+				blockSize = (int) lblockSize;
+
+			LzmaDecode(blockSize);
+
+			if (uncompressed_size == 0) {
+				GlobalOutSize = GlobalNowPos;
+			} else {
+				GlobalNowPos += uncompressed_size;
+			}
+		}
+	}
+
 	private void LzmaDecode(int outSize) throws IOException {
 		byte previousbyte;
 		int posStateMask = (1 << (pb)) - 1;
@@ -93,7 +119,7 @@ public class LzmaInputStream extends java.io.FilterInputStream {
 			previousbyte = dictionary[dictionaryPos - 1];
 
 		while (uncompressed_size < outSize) {
-			int posState = (int) ((uncompressed_size + GlobalPos) & posStateMask);
+			int posState = (uncompressed_size + GlobalPos) & posStateMask;
 
 			if (RangeDecoder.BitDecode(probs, IsMatch
 					+ (State << CRangeDecoder.kNumPosBitsMax) + posState) == 0) {
@@ -232,24 +258,26 @@ public class LzmaInputStream extends java.io.FilterInputStream {
 		GlobalPos = GlobalPos + uncompressed_size;
 	}
 
-	private void fill_buffer() throws IOException {
-		if (GlobalNowPos < GlobalOutSize) {
-			uncompressed_offset = 0;
-			long lblockSize = GlobalOutSize - GlobalNowPos;
-			int blockSize;
-			if (lblockSize > kBlockSize)
-				blockSize = kBlockSize;
-			else
-				blockSize = (int) lblockSize;
+	@Override
+	public int read(byte[] buf, int off, int len) throws IOException {
+		if (isClosed)
+			throw new IOException("stream closed");
 
-			LzmaDecode(blockSize);
-
-			if (uncompressed_size == 0) {
-				GlobalOutSize = GlobalNowPos;
-			} else {
-				GlobalNowPos += uncompressed_size;
-			}
+		if ((off | len | (off + len) | (buf.length - (off + len))) < 0) {
+			throw new IndexOutOfBoundsException();
 		}
+		if (len == 0)
+			return 0;
+
+		if (uncompressed_offset == uncompressed_size)
+			fill_buffer();
+		if (uncompressed_offset == uncompressed_size)
+			return -1;
+
+		int l = Math.min(len, uncompressed_size - uncompressed_offset);
+		System.arraycopy(uncompressed_buffer, uncompressed_offset, buf, off, l);
+		uncompressed_offset += l;
+		return l;
 	}
 
 	private void readHeader() throws IOException {
@@ -310,31 +338,5 @@ public class LzmaInputStream extends java.io.FilterInputStream {
 		uncompressed_offset = 0;
 
 		GlobalNowPos = 0;
-	}
-
-	public int read(byte[] buf, int off, int len) throws IOException {
-		if (isClosed)
-			throw new IOException("stream closed");
-
-		if ((off | len | (off + len) | (buf.length - (off + len))) < 0) {
-			throw new IndexOutOfBoundsException();
-		}
-		if (len == 0)
-			return 0;
-
-		if (uncompressed_offset == uncompressed_size)
-			fill_buffer();
-		if (uncompressed_offset == uncompressed_size)
-			return -1;
-
-		int l = Math.min(len, uncompressed_size - uncompressed_offset);
-		System.arraycopy(uncompressed_buffer, uncompressed_offset, buf, off, l);
-		uncompressed_offset += l;
-		return l;
-	}
-
-	public void close() throws IOException {
-		isClosed = true;
-		super.close();
 	}
 }

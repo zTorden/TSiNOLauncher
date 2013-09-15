@@ -3,7 +3,11 @@ package net.minecraft.bootstrap;
 import java.io.File;
 
 public class Util {
-	public static final String APPLICATION_NAME = "minecraft";
+	public static enum OS {
+		WINDOWS, MACOS, SOLARIS, LINUX, UNKNOWN;
+	}
+
+	public static final String APPLICATION_NAME = "tsino_minecraft";
 
 	public static OS getPlatform() {
 		String osName = System.getProperty("os.name").toLowerCase();
@@ -24,27 +28,22 @@ public class Util {
 		switch (getPlatform()) {
 		case SOLARIS:
 		case LINUX:
-			workingDirectory = new File(userHome, ".minecraft/");
+			workingDirectory = new File(userHome, "." + APPLICATION_NAME + "/");
 			break;
 		case WINDOWS:
 			String applicationData = System.getenv("APPDATA");
 			String folder = applicationData != null ? applicationData
 					: userHome;
 
-			workingDirectory = new File(folder, ".minecraft/");
+			workingDirectory = new File(folder, "." + APPLICATION_NAME + "/");
 			break;
 		case MACOS:
 			workingDirectory = new File(userHome,
-					"Library/Application Support/minecraft");
+					"Library/Application Support/" + APPLICATION_NAME);
 			break;
 		default:
-			workingDirectory = new File(userHome, "minecraft/");
+			workingDirectory = new File(userHome, APPLICATION_NAME + "/");
 		}
-
 		return workingDirectory;
-	}
-
-	public static enum OS {
-		WINDOWS, MACOS, SOLARIS, LINUX, UNKNOWN;
 	}
 }

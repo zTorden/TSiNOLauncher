@@ -12,6 +12,10 @@ import net.minecraft.launcher.Launcher;
 import net.minecraft.launcher.OperatingSystem;
 
 public class WebsiteTab extends JScrollPane {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4904842198124329148L;
 	private final JTextPane blog = new JTextPane();
 	private final Launcher launcher;
 
@@ -23,8 +27,9 @@ public class WebsiteTab extends JScrollPane {
 		this.blog.setBackground(Color.DARK_GRAY);
 		this.blog.setContentType("text/html");
 		this.blog
-				.setText("<html><body><font color=\"#808080\"><br><br><br><br><br><br><br><center><h1>Loading page..</h1></center></font></body></html>");
+				.setText("<html><body><font color=\"#808080\"><br><br><br><br><br><br><br><center><h1>Загрузка страницы..</h1></center></font></body></html>");
 		this.blog.addHyperlinkListener(new HyperlinkListener() {
+			@Override
 			public void hyperlinkUpdate(HyperlinkEvent he) {
 				if (he.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
 					try {
@@ -39,8 +44,13 @@ public class WebsiteTab extends JScrollPane {
 		setViewportView(this.blog);
 	}
 
+	public Launcher getLauncher() {
+		return this.launcher;
+	}
+
 	public void setPage(final String url) {
 		Thread thread = new Thread("Update website tab") {
+			@Override
 			public void run() {
 				try {
 					WebsiteTab.this.blog.setPage(new URL(url));
@@ -48,7 +58,7 @@ public class WebsiteTab extends JScrollPane {
 					Launcher.getInstance().println(
 							"Unexpected exception loading " + url, e);
 					WebsiteTab.this.blog
-							.setText("<html><body><font color=\"#808080\"><br><br><br><br><br><br><br><center><h1>Failed to get page</h1><br>"
+							.setText("<html><body><font color=\"#808080\"><br><br><br><br><br><br><br><center><h1>Ошибка!</h1><br>"
 									+ e.toString()
 									+ "</center></font></body></html>");
 				}
@@ -56,10 +66,6 @@ public class WebsiteTab extends JScrollPane {
 		};
 		thread.setDaemon(true);
 		thread.start();
-	}
-
-	public Launcher getLauncher() {
-		return this.launcher;
 	}
 }
 

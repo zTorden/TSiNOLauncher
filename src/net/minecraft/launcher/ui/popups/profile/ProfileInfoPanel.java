@@ -22,6 +22,10 @@ import net.minecraft.launcher.profile.LauncherVisibilityRule;
 import net.minecraft.launcher.profile.Profile;
 
 public class ProfileInfoPanel extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1551232319277277825L;
 	private final ProfileEditorPopup editor;
 	private final JCheckBox gameDirCustom = new JCheckBox("Game Directory:");
 	private final JTextField profileName = new JTextField();
@@ -44,6 +48,94 @@ public class ProfileInfoPanel extends JPanel {
 		createInterface();
 		fillDefaultValues();
 		addEventHandlers();
+	}
+
+	protected void addEventHandlers() {
+		this.profileName.getDocument().addDocumentListener(
+				new DocumentListener() {
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateProfileName();
+					}
+
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateProfileName();
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateProfileName();
+					}
+				});
+		this.gameDirCustom.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileInfoPanel.this.updateGameDirState();
+			}
+		});
+		this.gameDirField.getDocument().addDocumentListener(
+				new DocumentListener() {
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateGameDir();
+					}
+
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateGameDir();
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						ProfileInfoPanel.this.updateGameDir();
+					}
+				});
+		this.resolutionCustom.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileInfoPanel.this.updateResolutionState();
+			}
+		});
+		DocumentListener resolutionListener = new DocumentListener() {
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				ProfileInfoPanel.this.updateResolution();
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				ProfileInfoPanel.this.updateResolution();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				ProfileInfoPanel.this.updateResolution();
+			}
+		};
+		this.resolutionWidth.getDocument().addDocumentListener(
+				resolutionListener);
+		this.resolutionHeight.getDocument().addDocumentListener(
+				resolutionListener);
+
+		this.useHopper.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileInfoPanel.this.updateHopper();
+			}
+		});
+		this.launcherVisibilityCustom.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileInfoPanel.this.updateLauncherVisibilityState();
+			}
+		});
+		this.launcherVisibilityOption.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				ProfileInfoPanel.this.updateLauncherVisibilitySelection();
+			}
+		});
 	}
 
 	protected void createInterface() {
@@ -151,78 +243,37 @@ public class ProfileInfoPanel extends JPanel {
 		updateLauncherVisibilityState();
 	}
 
-	protected void addEventHandlers() {
-		this.profileName.getDocument().addDocumentListener(
-				new DocumentListener() {
-					public void insertUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateProfileName();
-					}
+	private void updateGameDir() {
+		File file = new File(this.gameDirField.getText());
+		this.editor.getProfile().setGameDir(file);
+	}
 
-					public void removeUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateProfileName();
-					}
+	private void updateGameDirState() {
+		if (this.gameDirCustom.isSelected()) {
+			this.gameDirField.setEnabled(true);
+			this.editor.getProfile().setGameDir(
+					new File(this.gameDirField.getText()));
+		} else {
+			this.gameDirField.setEnabled(false);
+			this.editor.getProfile().setGameDir(null);
+		}
+	}
 
-					public void changedUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateProfileName();
-					}
-				});
-		this.gameDirCustom.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileInfoPanel.this.updateGameDirState();
-			}
-		});
-		this.gameDirField.getDocument().addDocumentListener(
-				new DocumentListener() {
-					public void insertUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateGameDir();
-					}
+	private void updateHopper() {
+		Profile profile = this.editor.getProfile();
 
-					public void removeUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateGameDir();
-					}
+		if (this.useHopper.isSelected())
+			profile.setUseHopperCrashService(true);
+		else
+			profile.setUseHopperCrashService(false);
+	}
 
-					public void changedUpdate(DocumentEvent e) {
-						ProfileInfoPanel.this.updateGameDir();
-					}
-				});
-		this.resolutionCustom.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileInfoPanel.this.updateResolutionState();
-			}
-		});
-		DocumentListener resolutionListener = new DocumentListener() {
-			public void insertUpdate(DocumentEvent e) {
-				ProfileInfoPanel.this.updateResolution();
-			}
+	private void updateLauncherVisibilitySelection() {
+		Profile profile = this.editor.getProfile();
 
-			public void removeUpdate(DocumentEvent e) {
-				ProfileInfoPanel.this.updateResolution();
-			}
-
-			public void changedUpdate(DocumentEvent e) {
-				ProfileInfoPanel.this.updateResolution();
-			}
-		};
-		this.resolutionWidth.getDocument().addDocumentListener(
-				resolutionListener);
-		this.resolutionHeight.getDocument().addDocumentListener(
-				resolutionListener);
-
-		this.useHopper.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileInfoPanel.this.updateHopper();
-			}
-		});
-		this.launcherVisibilityCustom.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileInfoPanel.this.updateLauncherVisibilityState();
-			}
-		});
-		this.launcherVisibilityOption.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				ProfileInfoPanel.this.updateLauncherVisibilitySelection();
-			}
-		});
+		if ((this.launcherVisibilityOption.getSelectedItem() instanceof LauncherVisibilityRule))
+			profile.setLauncherVisibilityOnGameClose((LauncherVisibilityRule) this.launcherVisibilityOption
+					.getSelectedItem());
 	}
 
 	private void updateLauncherVisibilityState() {
@@ -239,49 +290,9 @@ public class ProfileInfoPanel extends JPanel {
 		}
 	}
 
-	private void updateLauncherVisibilitySelection() {
-		Profile profile = this.editor.getProfile();
-
-		if ((this.launcherVisibilityOption.getSelectedItem() instanceof LauncherVisibilityRule))
-			profile.setLauncherVisibilityOnGameClose((LauncherVisibilityRule) this.launcherVisibilityOption
-					.getSelectedItem());
-	}
-
-	private void updateHopper() {
-		Profile profile = this.editor.getProfile();
-
-		if (this.useHopper.isSelected())
-			profile.setUseHopperCrashService(true);
-		else
-			profile.setUseHopperCrashService(false);
-	}
-
 	private void updateProfileName() {
 		if (this.profileName.getText().length() > 0)
 			this.editor.getProfile().setName(this.profileName.getText());
-	}
-
-	private void updateGameDirState() {
-		if (this.gameDirCustom.isSelected()) {
-			this.gameDirField.setEnabled(true);
-			this.editor.getProfile().setGameDir(
-					new File(this.gameDirField.getText()));
-		} else {
-			this.gameDirField.setEnabled(false);
-			this.editor.getProfile().setGameDir(null);
-		}
-	}
-
-	private void updateResolutionState() {
-		if (this.resolutionCustom.isSelected()) {
-			this.resolutionWidth.setEnabled(true);
-			this.resolutionHeight.setEnabled(true);
-			updateResolution();
-		} else {
-			this.resolutionWidth.setEnabled(false);
-			this.resolutionHeight.setEnabled(false);
-			this.editor.getProfile().setResolution(null);
-		}
 	}
 
 	private void updateResolution() {
@@ -296,9 +307,16 @@ public class ProfileInfoPanel extends JPanel {
 		}
 	}
 
-	private void updateGameDir() {
-		File file = new File(this.gameDirField.getText());
-		this.editor.getProfile().setGameDir(file);
+	private void updateResolutionState() {
+		if (this.resolutionCustom.isSelected()) {
+			this.resolutionWidth.setEnabled(true);
+			this.resolutionHeight.setEnabled(true);
+			updateResolution();
+		} else {
+			this.resolutionWidth.setEnabled(false);
+			this.resolutionHeight.setEnabled(false);
+			this.editor.getProfile().setResolution(null);
+		}
 	}
 }
 

@@ -14,22 +14,6 @@ public class VersionFilter {
 		Collections.addAll(this.types, ReleaseType.values());
 	}
 
-	public Set<ReleaseType> getTypes() {
-		return this.types;
-	}
-
-	public VersionFilter onlyForTypes(ReleaseType[] types) {
-		this.types.clear();
-		includeTypes(types);
-		return this;
-	}
-
-	public VersionFilter includeTypes(ReleaseType[] types) {
-		if (types != null)
-			Collections.addAll(this.types, types);
-		return this;
-	}
-
 	public VersionFilter excludeTypes(ReleaseType[] types) {
 		if (types != null) {
 			for (ReleaseType type : types) {
@@ -41,6 +25,22 @@ public class VersionFilter {
 
 	public int getMaxCount() {
 		return this.maxCount;
+	}
+
+	public Set<ReleaseType> getTypes() {
+		return this.types;
+	}
+
+	public VersionFilter includeTypes(ReleaseType[] types) {
+		if (types != null)
+			Collections.addAll(this.types, types);
+		return this;
+	}
+
+	public VersionFilter onlyForTypes(ReleaseType[] types) {
+		this.types.clear();
+		includeTypes(types);
+		return this;
 	}
 
 	public VersionFilter setMaxCount(int maxCount) {

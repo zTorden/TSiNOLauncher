@@ -13,11 +13,33 @@ import java.util.concurrent.TimeUnit;
 import net.minecraft.launcher.Launcher;
 
 public class ExceptionalThreadPoolExecutor extends ThreadPoolExecutor {
+	public class ExceptionalFutureTask<T> extends FutureTask<T> {
+
+		public ExceptionalFutureTask(Callable<T> callable) {
+			super(callable);
+		}
+
+		public ExceptionalFutureTask(Runnable runnable, T result) {
+			super(runnable, result);
+		}
+
+		@Override
+		protected void done() {
+			try {
+				get();
+			} catch (Throwable t) {
+				Launcher.getInstance().println(
+						"Unhandled exception in executor " + this, t);
+			}
+		}
+	}
+
 	public ExceptionalThreadPoolExecutor(int threadCount) {
 		super(threadCount, threadCount, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>());
 	}
 
+	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
 		super.afterExecute(r, t);
 
@@ -35,32 +57,14 @@ public class ExceptionalThreadPoolExecutor extends ThreadPoolExecutor {
 			}
 	}
 
-	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-		return new ExceptionalFutureTask<T>(runnable, value);
-	}
-
+	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
 		return new ExceptionalFutureTask<T>(callable);
 	}
 
-	public class ExceptionalFutureTask<T> extends FutureTask<T> {
-
-		public ExceptionalFutureTask(Callable<T> callable) {
-			super(callable);
-		}
-
-		public ExceptionalFutureTask(Runnable runnable, T result) {
-			super(runnable, result);
-		}
-
-		protected void done() {
-			try {
-				get();
-			} catch (Throwable t) {
-				Launcher.getInstance().println(
-						"Unhandled exception in executor " + this, t);
-			}
-		}
+	@Override
+	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+		return new ExceptionalFutureTask<T>(runnable, value);
 	}
 }
 
