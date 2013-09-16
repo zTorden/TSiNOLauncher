@@ -1,4 +1,4 @@
 TSiNOLauncher
 =============
 
-tsino.unet.by laucher source code.
+tsino.unet.by 1.6.2 laucher source code.
