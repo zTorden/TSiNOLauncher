@@ -143,29 +143,6 @@ public class Bootstrap extends JFrame {
 
 	private final StringBuilder outputBuffer = new StringBuilder();
 
-	private void extractFile(String name) {
-		File servers = new File(workDir, name);
-		print("Extracting " + servers.getAbsolutePath());
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			is = GameLauncher.class.getResourceAsStream(name);
-			os = new FileOutputStream(servers);
-			byte[] buffer = new byte[65536];
-			int read = is.read(buffer);
-			while (read >= 1) {
-				os.write(buffer, 0, read);
-				read = is.read(buffer);
-			}
-			println(" Extracted successfully");
-		} catch (IOException ex) {
-			println(" Failed!");
-		} finally {
-			EtagDatabase.closeSilently(is);
-			EtagDatabase.closeSilently(os);
-		}
-	}
-
 	public Bootstrap(File workDir, Proxy proxy,
 			PasswordAuthentication proxyAuth, String[] remainderArgs) {
 		super("Minecraft Launcher");
@@ -222,6 +199,29 @@ public class Bootstrap extends JFrame {
 		println("");
 
 		extractFile("/servers.dat");
+	}
+
+	private void extractFile(String name) {
+		File servers = new File(workDir, name);
+		print("Extracting " + servers.getAbsolutePath());
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			is = GameLauncher.class.getResourceAsStream(name);
+			os = new FileOutputStream(servers);
+			byte[] buffer = new byte[65536];
+			int read = is.read(buffer);
+			while (read >= 1) {
+				os.write(buffer, 0, read);
+				read = is.read(buffer);
+			}
+			println(" Extracted successfully");
+		} catch (IOException ex) {
+			println(" Failed!");
+		} finally {
+			EtagDatabase.closeSilently(is);
+			EtagDatabase.closeSilently(os);
+		}
 	}
 
 	private void print(String string) {

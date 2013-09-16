@@ -28,6 +28,7 @@ public class DownloadJob {
 	private final boolean ignoreFailures;
 	private final AtomicInteger remainingThreads = new AtomicInteger();
 	private boolean started;
+	private boolean checked = false;
 
 	public DownloadJob(String name, boolean ignoreFailures,
 			DownloadListener listener) {
@@ -113,7 +114,7 @@ public class DownloadJob {
 
 	public boolean isComplete() {
 		return (this.started) && (this.remainingFiles.isEmpty())
-				&& (this.remainingThreads.get() == 0);
+				&& (this.remainingThreads.get() == 0) && (this.checked);
 	}
 
 	public boolean isStarted() {
@@ -147,6 +148,10 @@ public class DownloadJob {
 		}
 		if (this.remainingThreads.decrementAndGet() <= 0)
 			this.listener.onDownloadJobFinished(this);
+	}
+
+	public void setChecked() {
+		this.checked = true;
 	}
 
 	public boolean shouldIgnoreFailures() {

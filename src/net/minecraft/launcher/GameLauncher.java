@@ -335,6 +335,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		updateProgressBar();
 		EtagDatabase.getInstance().saveDatabase();
 		synchronized (this.lock) {
+			job.setChecked();
 			if (job.getFailures() > 0) {
 				this.launcher.println("Job '" + job.getName()
 						+ "' finished with " + job.getFailures()
@@ -344,7 +345,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				this.launcher.println("Job '" + job.getName()
 						+ "' finished successfully");
 
-				if ((isWorking()) && (!hasRemainingJobs()))
+				if ((isWorking()) && (!hasRemainingJobs())) {
 					try {
 						launchGame();
 					} catch (Throwable ex) {
@@ -353,6 +354,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 										"Fatal error launching game. Report this to http://mojang.atlassian.net please!",
 										ex);
 					}
+				}
 			}
 		}
 	}
