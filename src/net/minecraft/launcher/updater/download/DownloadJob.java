@@ -114,7 +114,11 @@ public class DownloadJob {
 
 	public boolean isComplete() {
 		return (this.started) && (this.remainingFiles.isEmpty())
-				&& (this.remainingThreads.get() == 0) && (this.checked);
+				&& (this.remainingThreads.get() == 0);
+	}
+
+	public boolean isFinished() {
+		return (isComplete()) && (this.checked);
 	}
 
 	public boolean isStarted() {

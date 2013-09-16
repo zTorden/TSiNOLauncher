@@ -165,10 +165,21 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		}
 	}
 
-	public boolean hasRemainingJobs() {
+	public boolean hasActiveJobs() {
 		synchronized (this.lock) {
 			for (DownloadJob job : this.jobs) {
 				if (!job.isComplete())
+					return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean hasRemainingJobs() {
+		synchronized (this.lock) {
+			for (DownloadJob job : this.jobs) {
+				if (!job.isFinished())
 					return true;
 			}
 		}
@@ -701,7 +712,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 
 	protected void updateProgressBar() {
 		final float progress = getProgress();
-		final boolean hasTasks = hasRemainingJobs();
+		final boolean hasTasks = hasActiveJobs();
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override

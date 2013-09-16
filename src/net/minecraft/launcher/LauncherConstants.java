@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class LauncherConstants {
-	public static final String VERSION_NAME = "1.2.3-15";
+	public static final String VERSION_NAME = "1.2.3-15 (amd 2013)";
 	public static final int VERSION_NUMERIC = 15;
 	public static final URI URL_REGISTER = constantURI("http://tsino.unet.by/register.php");
 	public static final String URL_DOWNLOAD_BASE = "http://tsino.unet.by/minecraft/klient/";
