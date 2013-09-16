@@ -172,8 +172,17 @@ public class LogInForm extends JPanel implements ActionListener {
 										.getErrorForm()
 										.displayError(
 												new String[] {
-														"Sorry, but we couldn't log you in right now.",
-														"Please try again later." });
+														"Извините, Вы ввели неправильный логин или пароль.",
+														"Если Вы не помните Ваш пароль, нажмите на ссылку 'Забыли пароль?'" });
+								LogInForm.this.popup.setCanLogIn(true);
+							} catch (UpdateLauncherException ex) {
+								LogInForm.this.popup.getLauncher().println(ex);
+								LogInForm.this.popup
+										.getErrorForm()
+										.displayError(
+												new String[] {
+														"Извините, у Вас старая версия лаунчера.",
+														"Пожалуйста, скачайте новый лаунчер." });
 								LogInForm.this.popup.setCanLogIn(true);
 							} catch (AuthenticationException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
@@ -181,8 +190,8 @@ public class LogInForm extends JPanel implements ActionListener {
 										.getErrorForm()
 										.displayError(
 												new String[] {
-														"Sorry, but we couldn't connect to our servers.",
-														"Please make sure that you are online and that Minecraft is not blocked." });
+														"Извините, невозможно подключиться к серверу.",
+														"Проверьте Ваше интернет-соединение." });
 								LogInForm.this.popup.setCanLogIn(true);
 							}
 						}

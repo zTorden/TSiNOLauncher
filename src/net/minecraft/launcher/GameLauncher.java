@@ -72,8 +72,8 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 	private void cleanOldNatives() {
 		File root = new File(this.launcher.getWorkingDirectory(), "versions/");
 		this.launcher.println("Looking for old natives to clean up...");
-		IOFileFilter ageFilter = new AgeFileFilter(
-				System.currentTimeMillis() - 3600L);
+		IOFileFilter ageFilter = new AgeFileFilter(System.currentTimeMillis()
+				- LauncherConstants.MAX_NATIVES_LIFE_IN_SECONDS);
 
 		for (File version : root
 				.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY))

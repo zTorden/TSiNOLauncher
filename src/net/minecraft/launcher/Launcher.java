@@ -139,8 +139,8 @@ public class Launcher {
 		downloadResources();
 		refreshVersionsAndProfiles();
 
-		println("Launcher 1.2.3 (through bootstrap " + bootstrapVersion
-				+ ") started on "
+		println("Launcher " + LauncherConstants.VERSION_NAME
+				+ " (through bootstrap " + bootstrapVersion + ") started on "
 				+ OperatingSystem.getCurrentPlatform().getName() + "...");
 		println("Current time is "
 				+ DateFormat.getDateTimeInstance(2, 2, Locale.US).format(
@@ -267,7 +267,8 @@ public class Launcher {
 
 	protected void initializeFrame() {
 		this.frame.getContentPane().removeAll();
-		this.frame.setTitle("Minecraft Launcher 1.2.3");
+		this.frame.setTitle("Minecraft Launcher "
+				+ LauncherConstants.VERSION_NAME);
 		this.frame.setPreferredSize(new Dimension(900, 580));
 		this.frame.setDefaultCloseOperation(2);
 
