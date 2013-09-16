@@ -249,7 +249,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		} else {
 			boolean is32Bit = "32".equals(System
 					.getProperty("sun.arch.data.model"));
-			String defaultArgument = is32Bit ? "-Xmx512M" : "-Xmx1G";
+			String defaultArgument = is32Bit ? Profile.DEFAULT_JRE_ARGUMENTS_32BIT : Profile.DEFAULT_JRE_ARGUMENTS_64BIT;
 			processLauncher.addSplitCommands(defaultArgument);
 		}
 
@@ -588,6 +588,22 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				Launcher.getInstance().println(
 						"Couldn't get version info for "
 								+ syncInfo.getLatestVersion(), e);
+				setWorking(false);
+				return;
+			}
+
+			// =========
+			this.launcher.println("Queueing mods downloads");
+			try {
+				DownloadJob job = new DownloadJob("Mods", false, this);
+				addJob(job);
+				this.launcher.getVersionManager().downloadMods(syncInfo, job);
+				job.startDownloading(this.launcher.getVersionManager()
+						.getExecutorService());
+			} catch (IOException e) {
+				Launcher.getInstance().println(
+						"Couldn't get mods for " + syncInfo.getLatestVersion(),
+						e);
 				setWorking(false);
 				return;
 			}

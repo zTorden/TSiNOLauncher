@@ -27,10 +27,12 @@ import net.minecraft.launcher.OperatingSystem;
 import net.minecraft.launcher.events.RefreshedVersionsListener;
 import net.minecraft.launcher.updater.download.DownloadJob;
 import net.minecraft.launcher.updater.download.Downloadable;
+import net.minecraft.launcher.versions.CompleteModList;
 import net.minecraft.launcher.versions.CompleteVersion;
 import net.minecraft.launcher.versions.ReleaseType;
 import net.minecraft.launcher.versions.Version;
 
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -91,6 +93,42 @@ public class VersionManager {
 				new File(baseDirectory, jarFile), false) });
 
 		return job;
+	}
+
+	public DownloadJob downloadMods(VersionSyncInfo syncInfo, DownloadJob job)
+			throws IOException {
+
+		CompleteModList version = remoteVersionList.getCompleteModList();
+		File baseDirectory = ((LocalVersionList) this.localVersionList)
+				.getBaseDirectory();
+		Proxy proxy = ((RemoteVersionList) this.remoteVersionList).getProxy();
+
+		job.addDownloadables(version.getRequiredDownloadables(
+				OperatingSystem.getCurrentPlatform(), proxy, baseDirectory,
+				false));
+
+		Set<String> req_mods = version.getRequiredFiles("mods");
+		cleanDirectory("mods", req_mods);
+
+		Set<String> req_coremods = version.getRequiredFiles("coremods");
+		cleanDirectory("coremods", req_coremods);
+
+		return job;
+	}
+
+	private void cleanDirectory(String directory, Set<String> files) {
+		File baseDirectory = ((LocalVersionList) this.localVersionList)
+				.getBaseDirectory();
+		File coremods_dir = new File(baseDirectory, directory);
+		if (coremods_dir.exists()) {
+			for (File file : coremods_dir.listFiles()) {
+				if (file.isFile() && !files.contains(file.getName())) {
+					Launcher.getInstance().println(
+							"Removing mod: " + file.toString());
+					FileUtils.deleteQuietly(file);
+				}
+			}
+		}
 	}
 
 	public ThreadPoolExecutor getExecutorService() {

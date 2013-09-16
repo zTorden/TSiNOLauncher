@@ -54,8 +54,7 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 	public String getSessionToken() {
 		if ((isLoggedIn()) && (getSelectedProfile() != null)
 				&& (canPlayOnline())) {
-			return String.format("token:%s:%s", new Object[] {
-					getAccessToken(), getSelectedProfile().getId() });
+			return getAccessToken();
 		}
 		return null;
 	}

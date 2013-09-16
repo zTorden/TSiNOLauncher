@@ -35,8 +35,8 @@ public class Profile {
 		}
 	}
 
-	public static final String DEFAULT_JRE_ARGUMENTS_64BIT = "-Xmx1G";
-	public static final String DEFAULT_JRE_ARGUMENTS_32BIT = "-Xmx512M";
+	public static final String DEFAULT_JRE_ARGUMENTS_64BIT = "-Xmx1G -Dfml.ignoreInvalidMinecraftCertificates=true";
+	public static final String DEFAULT_JRE_ARGUMENTS_32BIT = "-Xmx512M -Dfml.ignoreInvalidMinecraftCertificates=true";
 	public static final Resolution DEFAULT_RESOLUTION = new Resolution(854, 480);
 	public static final LauncherVisibilityRule DEFAULT_LAUNCHER_VISIBILITY = LauncherVisibilityRule.CLOSE_LAUNCHER;
 	public static final Set<ReleaseType> DEFAULT_RELEASE_TYPES = new HashSet<ReleaseType>(

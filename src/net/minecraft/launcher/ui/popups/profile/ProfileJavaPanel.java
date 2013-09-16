@@ -14,6 +14,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import net.minecraft.launcher.OperatingSystem;
+import net.minecraft.launcher.profile.Profile;
 
 public class ProfileJavaPanel extends JPanel {
 	/**
@@ -130,7 +131,7 @@ public class ProfileJavaPanel extends JPanel {
 			this.javaArgsField.setText(args);
 		} else {
 			this.javaArgsCustom.setSelected(false);
-			this.javaArgsField.setText("-Xmx1G");
+			this.javaArgsField.setText(Profile.DEFAULT_JRE_ARGUMENTS_64BIT);
 		}
 		updateJavaArgsState();
 	}

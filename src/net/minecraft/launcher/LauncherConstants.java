@@ -8,6 +8,9 @@ public class LauncherConstants {
 	public static final int VERSION_NUMERIC = 7;
 	public static final URI URL_REGISTER = constantURI("http://tsino.unet.by/register.php");
 	public static final String URL_DOWNLOAD_BASE = "http://tsino.unet.by/minecraft/klient/";
+	// public static final String URL_DOWNLOAD_BASE =
+	// "http://pftbest.lan/launcher/";
+	public static final String URL_MODS_BASE = URL_DOWNLOAD_BASE + "mods/";
 	public static final String URL_RESOURCE_BASE = "https://s3.amazonaws.com/Minecraft.Resources/";
 	public static final String URL_BLOG = "http://tsino.unet.by/minecraft/motd.html";
 	public static final String URL_SUPPORT = "http://tsino.unet.by";

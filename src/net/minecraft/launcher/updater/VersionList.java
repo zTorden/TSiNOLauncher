@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.launcher.OperatingSystem;
+import net.minecraft.launcher.versions.CompleteModList;
 import net.minecraft.launcher.versions.CompleteVersion;
 import net.minecraft.launcher.versions.PartialVersion;
 import net.minecraft.launcher.versions.ReleaseType;
@@ -104,6 +105,17 @@ public abstract class VersionList {
 		return complete;
 	}
 
+	public CompleteModList getCompleteModList()
+			throws IOException {
+
+		String content = getContent("mods/mods.json");
+
+		CompleteModList complete = this.gson.fromJson(content,
+				CompleteModList.class);
+
+		return complete;
+	}
+	
 	protected abstract String getContent(String paramString) throws IOException;
 
 	public Version getLatestVersion(ReleaseType type) {
