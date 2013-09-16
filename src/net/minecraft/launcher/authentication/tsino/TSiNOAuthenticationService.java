@@ -7,17 +7,18 @@ import java.util.Map;
 
 import net.minecraft.launcher.Http;
 import net.minecraft.launcher.Launcher;
+import net.minecraft.launcher.LauncherConstants;
 import net.minecraft.launcher.authentication.BaseAuthenticationService;
 import net.minecraft.launcher.authentication.GameProfile;
 import net.minecraft.launcher.authentication.exceptions.AuthenticationException;
 import net.minecraft.launcher.authentication.exceptions.InvalidCredentialsException;
+import net.minecraft.launcher.authentication.exceptions.UpdateLauncherException;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class TSiNOAuthenticationService extends BaseAuthenticationService {
 	private static final String BASE_URL = "http://tsino.unet.by/minecraft/auth.php";
-	private static final String STORAGE_KEY_ACCESS_TOKEN = "accessToken";
 	private static final String STORAGE_KEY_PASSWORD = "password";
 	private GameProfile[] profiles;
 	private String accessToken;
@@ -25,10 +26,8 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 
 	@Override
 	public boolean canLogIn() {
-		return (!canPlayOnline())
-				&& (StringUtils.isNotBlank(getUsername()))
-				&& ((StringUtils.isNotBlank(getPassword())) || (StringUtils
-						.isNotBlank(getAccessToken())));
+		return (!canPlayOnline()) && (StringUtils.isNotBlank(getUsername()))
+				&& ((StringUtils.isNotBlank(getPassword())));
 	}
 
 	@Override
@@ -67,8 +66,6 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 	@Override
 	public void loadFromStorage(Map<String, String> credentials) {
 		super.loadFromStorage(credentials);
-
-		this.accessToken = (credentials.get(STORAGE_KEY_ACCESS_TOKEN));
 		setPassword(credentials.get(STORAGE_KEY_PASSWORD));
 	}
 
@@ -123,7 +120,7 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 		Map<String, Object> query = new HashMap<String, Object>();
 		query.put("user", getUsername());
 		query.put("password", getPassword());
-		query.put("version", "14");
+		query.put("version", LauncherConstants.VERSION_NUMERIC);
 
 		String result;
 		try {
@@ -139,7 +136,7 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 				throw new InvalidCredentialsException(
 						"Неправильный логин или пароль!");
 			} else if (result.trim().equals("Old version")) {
-				throw new AuthenticationException("Нужно обновить лаунчер!");
+				throw new UpdateLauncherException("Нужно обновить лаунчер!");
 			}
 			throw new AuthenticationException(result);
 		}
@@ -151,10 +148,6 @@ public class TSiNOAuthenticationService extends BaseAuthenticationService {
 		Map<String, String> result = super.saveForStorage();
 		if (!shouldRememberMe())
 			return result;
-
-		if (StringUtils.isNotBlank(getAccessToken())) {
-			result.put(STORAGE_KEY_ACCESS_TOKEN, getAccessToken());
-		}
 
 		if (StringUtils.isNotBlank(getPassword())) {
 			result.put(STORAGE_KEY_PASSWORD, getPassword());

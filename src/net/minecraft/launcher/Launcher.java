@@ -30,6 +30,7 @@ import javax.swing.UIManager;
 import net.minecraft.launcher.authentication.AuthenticationService;
 import net.minecraft.launcher.authentication.exceptions.AuthenticationException;
 import net.minecraft.launcher.authentication.exceptions.InvalidCredentialsException;
+import net.minecraft.launcher.authentication.exceptions.UpdateLauncherException;
 import net.minecraft.launcher.authentication.tsino.TSiNOAuthenticationService;
 import net.minecraft.launcher.profile.Profile;
 import net.minecraft.launcher.profile.ProfileManager;
@@ -130,7 +131,7 @@ public class Launcher {
 			this.launcherPanel.getTabPanel().getConsole().print(line + "\n");
 		}
 
-		if (bootstrapVersion.intValue() < 4) {
+		if (bootstrapVersion.intValue() < LauncherConstants.MINIMUM_BOOTSTRAP_SUPPORTED) {
 			showOutdatedNotice();
 			return;
 		}
@@ -196,6 +197,7 @@ public class Launcher {
 		else if (!auth.isLoggedIn()) {
 			if (auth.canLogIn())
 				try {
+					println("Refreshing auth...");
 					auth.logIn();
 					try {
 						this.profileManager.saveProfiles();
@@ -204,28 +206,19 @@ public class Launcher {
 								e);
 					}
 					this.profileManager.fireRefreshEvent();
-				} catch (AuthenticationException e) {
+				} catch (InvalidCredentialsException e) {
 					println(e);
 					showLoginPrompt();
+				} catch (UpdateLauncherException e) {
+					println(e);
+					JOptionPane.showMessageDialog(frame, new String[] {
+							"Извините, у Вас старая версия лаунчера.",
+							"Пожалуйста, скачайте новый лаунчер." }, "Ошибка",
+							JOptionPane.WARNING_MESSAGE);
+				} catch (AuthenticationException e) {
+					println(e);
 				}
-			else
-				showLoginPrompt();
-		} else if (!auth.canPlayOnline())
-			try {
-				println("Refreshing auth...");
-				auth.logIn();
-				try {
-					this.profileManager.saveProfiles();
-				} catch (IOException e) {
-					println("Couldn't save profiles after refreshing auth!", e);
-				}
-				this.profileManager.fireRefreshEvent();
-			} catch (InvalidCredentialsException e) {
-				println(e);
-				showLoginPrompt();
-			} catch (AuthenticationException e) {
-				println(e);
-			}
+		}
 	}
 
 	public String[] getAdditionalArgs() {

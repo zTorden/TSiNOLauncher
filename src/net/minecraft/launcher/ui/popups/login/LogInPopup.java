@@ -44,7 +44,6 @@ public class LogInPopup extends JPanel implements ActionListener {
 	private final Launcher launcher;
 	private final Callback callback;
 	private final AuthErrorForm errorForm;
-	private final ExistingUserListForm existingUserListForm;
 	private final LogInForm logInForm;
 	private final JButton loginButton = new JButton("Вход");
 
@@ -57,7 +56,6 @@ public class LogInPopup extends JPanel implements ActionListener {
 		this.launcher = launcher;
 		this.callback = callback;
 		this.errorForm = new AuthErrorForm(this);
-		this.existingUserListForm = new ExistingUserListForm(this);
 		this.logInForm = new LogInForm(this);
 
 		createInterface();
@@ -92,9 +90,6 @@ public class LogInPopup extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
 
-		if (!this.launcher.getProfileManager().getAuthDatabase()
-				.getKnownNames().isEmpty())
-			add(this.existingUserListForm);
 		add(this.errorForm);
 		add(this.logInForm);
 
@@ -114,10 +109,6 @@ public class LogInPopup extends JPanel implements ActionListener {
 
 	public AuthErrorForm getErrorForm() {
 		return this.errorForm;
-	}
-
-	public ExistingUserListForm getExistingUserListForm() {
-		return this.existingUserListForm;
 	}
 
 	public Launcher getLauncher() {

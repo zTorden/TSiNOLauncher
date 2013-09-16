@@ -249,7 +249,8 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		} else {
 			boolean is32Bit = "32".equals(System
 					.getProperty("sun.arch.data.model"));
-			String defaultArgument = is32Bit ? Profile.DEFAULT_JRE_ARGUMENTS_32BIT : Profile.DEFAULT_JRE_ARGUMENTS_64BIT;
+			String defaultArgument = is32Bit ? Profile.DEFAULT_JRE_ARGUMENTS_32BIT
+					: Profile.DEFAULT_JRE_ARGUMENTS_64BIT;
 			processLauncher.addSplitCommands(defaultArgument);
 		}
 

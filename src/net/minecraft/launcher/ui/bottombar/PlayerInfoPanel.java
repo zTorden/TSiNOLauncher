@@ -54,8 +54,7 @@ public class PlayerInfoPanel extends JPanel implements
 				.getByUUID(profile.getPlayerUUID());
 
 		if ((auth == null) || (!auth.isLoggedIn())) {
-			this.welcomeText
-					.setText("Добро пожаловать, гость! Пожалуйста, войдите в систему.");
+			this.welcomeText.setText("Добро пожаловать, гость!");
 			this.logOutButton.setEnabled(false);
 		} else if (auth.getSelectedProfile() == null) {
 			this.welcomeText.setText("<html>Добро пожаловать, игрок!</html>");

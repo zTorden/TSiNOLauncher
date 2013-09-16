@@ -3,7 +3,10 @@ package net.minecraft.bootstrap;
 import java.awt.Font;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -27,6 +30,7 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.minecraft.launcher.GameLauncher;
 
 public class Bootstrap extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -139,6 +143,29 @@ public class Bootstrap extends JFrame {
 
 	private final StringBuilder outputBuffer = new StringBuilder();
 
+	private void extractFile(String name) {
+		File servers = new File(workDir, name);
+		print("Extracting " + servers.getAbsolutePath());
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			is = GameLauncher.class.getResourceAsStream(name);
+			os = new FileOutputStream(servers);
+			byte[] buffer = new byte[65536];
+			int read = is.read(buffer);
+			while (read >= 1) {
+				os.write(buffer, 0, read);
+				read = is.read(buffer);
+			}
+			println(" Extracted successfully");
+		} catch (IOException ex) {
+			println(" Failed!");
+		} finally {
+			EtagDatabase.closeSilently(is);
+			EtagDatabase.closeSilently(os);
+		}
+	}
+
 	public Bootstrap(File workDir, Proxy proxy,
 			PasswordAuthentication proxyAuth, String[] remainderArgs) {
 		super("Minecraft Launcher");
@@ -193,6 +220,8 @@ public class Bootstrap extends JFrame {
 				.append(System.getProperty("sun.arch.data.model")).append("'")
 				.toString());
 		println("");
+
+		extractFile("/servers.dat");
 	}
 
 	private void print(String string) {

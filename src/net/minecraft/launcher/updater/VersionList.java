@@ -71,6 +71,16 @@ public abstract class VersionList {
 		this.latestVersions.clear();
 	}
 
+	public CompleteModList getCompleteModList() throws IOException {
+
+		String content = getContent("mods/mods.json");
+
+		CompleteModList complete = this.gson.fromJson(content,
+				CompleteModList.class);
+
+		return complete;
+	}
+
 	public CompleteVersion getCompleteVersion(String name) throws IOException {
 		if ((name == null) || (name.length() == 0))
 			throw new IllegalArgumentException("Name cannot be null or empty");
@@ -105,17 +115,6 @@ public abstract class VersionList {
 		return complete;
 	}
 
-	public CompleteModList getCompleteModList()
-			throws IOException {
-
-		String content = getContent("mods/mods.json");
-
-		CompleteModList complete = this.gson.fromJson(content,
-				CompleteModList.class);
-
-		return complete;
-	}
-	
 	protected abstract String getContent(String paramString) throws IOException;
 
 	public Version getLatestVersion(ReleaseType type) {

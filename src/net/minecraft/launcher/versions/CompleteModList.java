@@ -28,23 +28,13 @@ public class CompleteModList implements Version {
 		return this.id;
 	}
 
+	public Collection<Mod> getMods() {
+		return this.mods;
+	}
+
 	@Override
 	public Date getReleaseTime() {
 		return this.releaseTime;
-	}
-
-	@Override
-	public ReleaseType getType() {
-		return this.type;
-	}
-
-	@Override
-	public Date getUpdatedTime() {
-		return this.time;
-	}
-
-	public Collection<Mod> getMods() {
-		return this.mods;
 	}
 
 	public Set<Downloadable> getRequiredDownloadables(OperatingSystem os,
@@ -80,6 +70,16 @@ public class CompleteModList implements Version {
 			}
 		}
 		return neededFiles;
+	}
+
+	@Override
+	public ReleaseType getType() {
+		return this.type;
+	}
+
+	@Override
+	public Date getUpdatedTime() {
+		return this.time;
 	}
 
 	@Override

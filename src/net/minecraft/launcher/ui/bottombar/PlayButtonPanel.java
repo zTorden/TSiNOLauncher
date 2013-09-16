@@ -62,7 +62,7 @@ public class PlayButtonPanel extends JPanel implements
 			this.playButton.setEnabled(false);
 			this.playButton.setText("Старт");
 		} else if (auth.getSelectedProfile() == null) {
-			this.playButton.setEnabled(true);
+			this.playButton.setEnabled(false);
 			this.playButton.setText("Старт");
 		} else if (auth.canPlayOnline()) {
 			this.playButton.setEnabled(true);

@@ -23,6 +23,7 @@ import net.minecraft.launcher.authentication.AuthenticationService;
 import net.minecraft.launcher.authentication.GameProfile;
 import net.minecraft.launcher.authentication.exceptions.AuthenticationException;
 import net.minecraft.launcher.authentication.exceptions.InvalidCredentialsException;
+import net.minecraft.launcher.authentication.exceptions.UpdateLauncherException;
 import net.minecraft.launcher.authentication.tsino.TSiNOAuthenticationService;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -262,9 +263,18 @@ public class LogInForm extends JPanel implements ActionListener {
 										.getErrorForm()
 										.displayError(
 												new String[] {
-														"Извините, вы ввели неправильный логин или пароль.",
+														"Извините, Вы ввели неправильный логин или пароль.",
 														"Если Вы не помните Ваш пароль, нажмите на ссылку 'Забыли пароль?'" });
 								LogInForm.this.popup.setCanLogIn(true);
+							} catch (UpdateLauncherException ex) {
+								LogInForm.this.popup.getLauncher().println(ex);
+								LogInForm.this.popup
+										.getErrorForm()
+										.displayError(
+												new String[] {
+														"Извините, у Вас старая версия лаунчера.",
+														"Пожалуйста, скачайте новый лаунчер." });
+								LogInForm.this.popup.setCanLogIn(false);
 							} catch (AuthenticationException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
 								LogInForm.this.popup

@@ -58,6 +58,42 @@ public class VersionManager {
 		this.refreshedVersionsListeners.add(listener);
 	}
 
+	private void cleanDirectory(String directory, Set<String> files) {
+		File baseDirectory = ((LocalVersionList) this.localVersionList)
+				.getBaseDirectory();
+		File coremods_dir = new File(baseDirectory, directory);
+		if (coremods_dir.exists()) {
+			for (File file : coremods_dir.listFiles()) {
+				if (file.isFile() && !files.contains(file.getName())) {
+					Launcher.getInstance().println(
+							"Removing mod: " + file.toString());
+					FileUtils.deleteQuietly(file);
+				}
+			}
+		}
+	}
+
+	public DownloadJob downloadMods(VersionSyncInfo syncInfo, DownloadJob job)
+			throws IOException {
+
+		CompleteModList version = remoteVersionList.getCompleteModList();
+		File baseDirectory = ((LocalVersionList) this.localVersionList)
+				.getBaseDirectory();
+		Proxy proxy = ((RemoteVersionList) this.remoteVersionList).getProxy();
+
+		job.addDownloadables(version.getRequiredDownloadables(
+				OperatingSystem.getCurrentPlatform(), proxy, baseDirectory,
+				false));
+
+		Set<String> req_mods = version.getRequiredFiles("mods");
+		cleanDirectory("mods", req_mods);
+
+		Set<String> req_coremods = version.getRequiredFiles("coremods");
+		cleanDirectory("coremods", req_coremods);
+
+		return job;
+	}
+
 	public DownloadJob downloadResources(DownloadJob job) throws IOException {
 		File baseDirectory = ((LocalVersionList) this.localVersionList)
 				.getBaseDirectory();
@@ -93,42 +129,6 @@ public class VersionManager {
 				new File(baseDirectory, jarFile), false) });
 
 		return job;
-	}
-
-	public DownloadJob downloadMods(VersionSyncInfo syncInfo, DownloadJob job)
-			throws IOException {
-
-		CompleteModList version = remoteVersionList.getCompleteModList();
-		File baseDirectory = ((LocalVersionList) this.localVersionList)
-				.getBaseDirectory();
-		Proxy proxy = ((RemoteVersionList) this.remoteVersionList).getProxy();
-
-		job.addDownloadables(version.getRequiredDownloadables(
-				OperatingSystem.getCurrentPlatform(), proxy, baseDirectory,
-				false));
-
-		Set<String> req_mods = version.getRequiredFiles("mods");
-		cleanDirectory("mods", req_mods);
-
-		Set<String> req_coremods = version.getRequiredFiles("coremods");
-		cleanDirectory("coremods", req_coremods);
-
-		return job;
-	}
-
-	private void cleanDirectory(String directory, Set<String> files) {
-		File baseDirectory = ((LocalVersionList) this.localVersionList)
-				.getBaseDirectory();
-		File coremods_dir = new File(baseDirectory, directory);
-		if (coremods_dir.exists()) {
-			for (File file : coremods_dir.listFiles()) {
-				if (file.isFile() && !files.contains(file.getName())) {
-					Launcher.getInstance().println(
-							"Removing mod: " + file.toString());
-					FileUtils.deleteQuietly(file);
-				}
-			}
-		}
 	}
 
 	public ThreadPoolExecutor getExecutorService() {
