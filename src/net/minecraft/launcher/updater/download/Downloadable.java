@@ -122,8 +122,8 @@ public class Downloadable {
 			throws IOException {
 		HttpURLConnection connection = (HttpURLConnection) this.url
 				.openConnection(this.proxy);
-		connection.setConnectTimeout(15000);
-		connection.setReadTimeout(60000);
+		connection.setConnectTimeout(5000);
+		connection.setReadTimeout(10000);
 		connection.setUseCaches(false);
 		connection.setDefaultUseCaches(false);
 		connection.setRequestProperty("Cache-Control",

@@ -211,10 +211,7 @@ public class Launcher {
 					showLoginPrompt();
 				} catch (UpdateLauncherException e) {
 					println(e);
-					JOptionPane.showMessageDialog(frame, new String[] {
-							"Извините, у Вас старая версия лаунчера.",
-							"Пожалуйста, скачайте новый лаунчер." }, "Ошибка",
-							JOptionPane.WARNING_MESSAGE);
+					showOutdatedNotice();
 				} catch (AuthenticationException e) {
 					println(e);
 				}
@@ -435,8 +432,9 @@ public class Launcher {
 		});
 	}
 
-	private void showOutdatedNotice() {
-		String error = "Sorry, but your launcher is outdated! Please redownload it at https://mojang.com/2013/06/minecraft-1-6-pre-release/";
+	public void showOutdatedNotice() {
+		String error = "Извините, у Вас старая версия лаунчера.\n"
+				+ "Пожалуйста, скачайте новый лаунчер.";
 
 		this.frame.getContentPane().removeAll();
 
@@ -445,13 +443,16 @@ public class Launcher {
 				LauncherConstants.BOOTSTRAP_OUT_OF_DATE_BUTTONS,
 				LauncherConstants.BOOTSTRAP_OUT_OF_DATE_BUTTONS[0]);
 
-		if (result == 0) {
+		if (result < LauncherConstants.BOOTSTRAP_OUT_OF_DATE_BUTTONS.length - 1) {
+			String uri = LauncherConstants.URL_LAUNCHER_TSINO;
+			if (result == 1) {
+				uri = LauncherConstants.URL_LAUNCHER_DROPBOX;
+			}
 			try {
-				OperatingSystem.openLink(new URI(
-						LauncherConstants.URL_BOOTSTRAP_DOWNLOAD));
+				OperatingSystem.openLink(new URI(uri));
 			} catch (URISyntaxException e) {
-				println("Couldn't open bootstrap download link. Please visit https://mojang.com/2013/06/minecraft-1-6-pre-release/ manually.",
-						e);
+				println("Неудалось открыть страницу, скачайте лаунчер вручную по адресу "
+						+ uri, e);
 			}
 		}
 		closeLauncher();

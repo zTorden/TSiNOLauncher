@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.launcher.Launcher;
 
 public class DownloadJob {
-	private static final int MAX_ATTEMPTS_PER_FILE = 5;
+	private static final int MAX_ATTEMPTS_PER_FILE = 7;
 	private static final int ASSUMED_AVERAGE_FILE_SIZE = 5242880;
 	private final Queue<Downloadable> remainingFiles = new ConcurrentLinkedQueue<Downloadable>();
 	private final List<Downloadable> allFiles = Collections

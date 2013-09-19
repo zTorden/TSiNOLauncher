@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -355,9 +356,9 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 			} else {
 				this.launcher.println("Job '" + job.getName()
 						+ "' finished successfully");
-
 				if ((isWorking()) && (!hasRemainingJobs())) {
 					try {
+						extractConfigs();
 						launchGame();
 					} catch (Throwable ex) {
 						Launcher.getInstance()
@@ -368,6 +369,41 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				}
 			}
 		}
+	}
+
+	private void extractConfigs() throws IOException {
+		File workingDirectory = launcher.getWorkingDirectory();
+		File zipFile = new File(workingDirectory, "config.zip");
+		File folder = new File(workingDirectory, "config/");
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
+
+		ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+		ZipEntry ze = zis.getNextEntry();
+
+		while (ze != null) {
+
+			String fileName = ze.getName();
+			File newFile = new File(folder, fileName);
+
+			System.out.println("file unzip : " + newFile.getAbsoluteFile());
+
+			if (ze.isDirectory()) {
+				newFile.mkdirs();
+			} else {
+				FileOutputStream fos = new FileOutputStream(newFile);
+
+				int len;
+				byte[] buffer = new byte[4096];
+				while ((len = zis.read(buffer)) > 0) {
+					fos.write(buffer, 0, len);
+				}
+				fos.close();
+			}
+			ze = zis.getNextEntry();
+		}
+		zis.close();
 	}
 
 	@Override
@@ -606,18 +642,32 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				return;
 			}
 
-			// =========
 			this.launcher.println("Queueing mods downloads");
 			try {
 				DownloadJob job = new DownloadJob("Mods", false, this);
 				addJob(job);
-				this.launcher.getVersionManager().downloadMods(syncInfo, job);
+				this.launcher.getVersionManager().downloadMods(job);
 				job.startDownloading(this.launcher.getVersionManager()
 						.getExecutorService());
 			} catch (IOException e) {
 				Launcher.getInstance().println(
 						"Couldn't get mods for " + syncInfo.getLatestVersion(),
 						e);
+				setWorking(false);
+				return;
+			}
+
+			this.launcher.println("Queueing config downloads");
+			try {
+				DownloadJob job = new DownloadJob("Configs", false, this);
+				addJob(job);
+				this.launcher.getVersionManager().downloadConfigs(job);
+				job.startDownloading(this.launcher.getVersionManager()
+						.getExecutorService());
+			} catch (IOException e) {
+				Launcher.getInstance().println(
+						"Couldn't get configs for "
+								+ syncInfo.getLatestVersion(), e);
 				setWorking(false);
 				return;
 			}

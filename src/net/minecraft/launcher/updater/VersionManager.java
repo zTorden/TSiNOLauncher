@@ -2,6 +2,7 @@ package net.minecraft.launcher.updater;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
@@ -73,8 +74,7 @@ public class VersionManager {
 		}
 	}
 
-	public DownloadJob downloadMods(VersionSyncInfo syncInfo, DownloadJob job)
-			throws IOException {
+	public DownloadJob downloadMods(DownloadJob job) throws IOException {
 
 		CompleteModList version = remoteVersionList.getCompleteModList();
 		File baseDirectory = ((LocalVersionList) this.localVersionList)
@@ -90,6 +90,17 @@ public class VersionManager {
 
 		Set<String> req_coremods = version.getRequiredFiles("coremods");
 		cleanDirectory("coremods", req_coremods);
+
+		return job;
+	}
+
+	public DownloadJob downloadConfigs(DownloadJob job) throws IOException {
+		File baseDirectory = ((LocalVersionList) this.localVersionList)
+				.getBaseDirectory();
+
+		job.addDownloadables(getConfigFiles(
+				((RemoteVersionList) this.remoteVersionList).getProxy(),
+				baseDirectory));
 
 		return job;
 	}
@@ -237,6 +248,21 @@ public class VersionManager {
 			Launcher.getInstance().println("Couldn't download resources", ex);
 		}
 
+		return result;
+	}
+
+	private Set<Downloadable> getConfigFiles(Proxy proxy, File baseDirectory) {
+		Set<Downloadable> result = new HashSet<Downloadable>();
+		try {
+			URL remoteFile = new URL(LauncherConstants.URL_CONFIG_ZIP);
+			File localFile = new File(baseDirectory, "config.zip");
+
+			Downloadable downloadable = new Downloadable(proxy, remoteFile,
+					localFile, isRefreshing);
+			result.add(downloadable);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		return result;
 	}
 

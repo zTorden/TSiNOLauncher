@@ -177,13 +177,8 @@ public class LogInForm extends JPanel implements ActionListener {
 								LogInForm.this.popup.setCanLogIn(true);
 							} catch (UpdateLauncherException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
-								LogInForm.this.popup
-										.getErrorForm()
-										.displayError(
-												new String[] {
-														"Извините, у Вас старая версия лаунчера.",
-														"Пожалуйста, скачайте новый лаунчер." });
-								LogInForm.this.popup.setCanLogIn(true);
+								LogInForm.this.popup.getLauncher()
+										.showOutdatedNotice();
 							} catch (AuthenticationException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
 								LogInForm.this.popup
@@ -277,13 +272,8 @@ public class LogInForm extends JPanel implements ActionListener {
 								LogInForm.this.popup.setCanLogIn(true);
 							} catch (UpdateLauncherException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
-								LogInForm.this.popup
-										.getErrorForm()
-										.displayError(
-												new String[] {
-														"Извините, у Вас старая версия лаунчера.",
-														"Пожалуйста, скачайте новый лаунчер." });
-								LogInForm.this.popup.setCanLogIn(false);
+								LogInForm.this.popup.getLauncher()
+										.showOutdatedNotice();
 							} catch (AuthenticationException ex) {
 								LogInForm.this.popup.getLauncher().println(ex);
 								LogInForm.this.popup
