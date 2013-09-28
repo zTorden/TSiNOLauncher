@@ -95,11 +95,11 @@ public class VersionManager {
 		return job;
 	}
 
-	public DownloadJob downloadConfigs(DownloadJob job) throws IOException {
+	public DownloadJob downloadCustomFiles(DownloadJob job) throws IOException {
 		File baseDirectory = ((LocalVersionList) this.localVersionList)
 				.getBaseDirectory();
 
-		job.addDownloadables(getConfigFiles(
+		job.addDownloadables(getCustomFiles(
 				((RemoteVersionList) this.remoteVersionList).getProxy(),
 				baseDirectory));
 
@@ -252,14 +252,19 @@ public class VersionManager {
 		return result;
 	}
 
-	private Set<Downloadable> getConfigFiles(Proxy proxy, File baseDirectory) {
+	private Set<Downloadable> getCustomFiles(Proxy proxy, File baseDirectory) {
 		Set<Downloadable> result = new HashSet<Downloadable>();
 		try {
 			URL remoteFile = new URL(LauncherConstants.URL_CONFIG_ZIP);
 			File localFile = new File(baseDirectory, "config.zip");
-
 			Downloadable downloadable = new Downloadable(proxy, remoteFile,
 					localFile, isRefreshing);
+			result.add(downloadable);
+
+			remoteFile = new URL(LauncherConstants.URL_RCPACK_ZIP);
+			localFile = new File(baseDirectory, "rcpack.zip");
+			downloadable = new Downloadable(proxy, remoteFile, localFile,
+					isRefreshing);
 			result.add(downloadable);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

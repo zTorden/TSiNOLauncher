@@ -372,7 +372,8 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				if ((isWorking()) && (!hasRemainingJobs())) {
 					try {
 						extractFile("/servers.dat");
-						extractConfigs();
+						extractZip("config.zip", "config/");
+						extractZip("rcpack.zip", "resourcepacks/");
 						launchGame();
 					} catch (Throwable ex) {
 						Launcher.getInstance()
@@ -385,10 +386,10 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		}
 	}
 
-	private void extractConfigs() throws IOException {
+	private void extractZip(String file, String dir) throws IOException {
 		File workingDirectory = launcher.getWorkingDirectory();
-		File zipFile = new File(workingDirectory, "config.zip");
-		File folder = new File(workingDirectory, "config/");
+		File zipFile = new File(workingDirectory, file);
+		File folder = new File(workingDirectory, dir);
 		if (!folder.exists()) {
 			folder.mkdir();
 		}
@@ -671,16 +672,16 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 				return;
 			}
 
-			this.launcher.println("Queueing config downloads");
+			this.launcher.println("Queueing custom files downloads");
 			try {
-				DownloadJob job = new DownloadJob("Configs", false, this);
+				DownloadJob job = new DownloadJob("Custom Files", false, this);
 				addJob(job);
-				this.launcher.getVersionManager().downloadConfigs(job);
+				this.launcher.getVersionManager().downloadCustomFiles(job);
 				job.startDownloading(this.launcher.getVersionManager()
 						.getExecutorService());
 			} catch (IOException e) {
 				Launcher.getInstance().println(
-						"Couldn't get configs for "
+						"Couldn't get custom files for "
 								+ syncInfo.getLatestVersion(), e);
 				setWorking(false);
 				return;

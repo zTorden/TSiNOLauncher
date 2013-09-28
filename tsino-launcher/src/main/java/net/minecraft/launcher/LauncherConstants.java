@@ -13,6 +13,8 @@ public class LauncherConstants {
 	public static final String URL_MODS_BASE = URL_DOWNLOAD_BASE + "mods/";
 	public static final String URL_CONFIG_ZIP = URL_DOWNLOAD_BASE
 			+ "config/config.zip";
+	public static final String URL_RCPACK_ZIP = URL_DOWNLOAD_BASE
+			+ "rcpack.zip";
 	public static final String URL_RESOURCE_BASE = "https://s3.amazonaws.com/Minecraft.Resources/";
 	public static final String URL_BLOG = "http://tsino.unet.by/minecraft/motd.html";
 	public static final String URL_SUPPORT = "http://tsino.unet.by";
