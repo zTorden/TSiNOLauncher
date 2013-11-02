@@ -402,7 +402,7 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 			String fileName = ze.getName();
 			File newFile = new File(folder, fileName);
 
-			System.out.println("file unzip : " + newFile.getAbsoluteFile());
+			launcher.println("file unzip : " + newFile.getAbsoluteFile());
 
 			if (ze.isDirectory()) {
 				newFile.mkdirs();
@@ -790,8 +790,3 @@ public class GameLauncher implements JavaProcessRunnable, DownloadListener {
 		});
 	}
 }
-
-/*
- * Location: Z:\home\vadim\.minecraft\launcher.jar Qualified Name:
- * net.minecraft.launcher.GameLauncher JD-Core Version: 0.6.2
- */

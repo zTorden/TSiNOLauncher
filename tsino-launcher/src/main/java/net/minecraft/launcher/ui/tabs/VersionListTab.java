@@ -109,7 +109,7 @@ public class VersionListTab extends JScrollPane implements
 			case COLUMN_TYPE:
 				return version.getType().getName();
 			case COLUMN_RELEASE_DATE:
-				return version.getReleaseTime();
+				return version.getUpdatedTime();
 			}
 
 			return null;

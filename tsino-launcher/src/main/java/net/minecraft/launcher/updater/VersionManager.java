@@ -340,12 +340,6 @@ public class VersionManager {
 			public int compare(VersionSyncInfo a, VersionSyncInfo b) {
 				Version aVer = a.getLatestVersion();
 				Version bVer = b.getLatestVersion();
-
-				if ((aVer.getReleaseTime() != null)
-						&& (bVer.getReleaseTime() != null)) {
-					return bVer.getReleaseTime().compareTo(
-							aVer.getReleaseTime());
-				}
 				return bVer.getUpdatedTime().compareTo(aVer.getUpdatedTime());
 			}
 		});

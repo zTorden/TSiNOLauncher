@@ -18,7 +18,6 @@ import net.minecraft.launcher.updater.download.Downloadable;
 public class CompleteVersion implements Version {
 	private String id;
 	private Date time;
-	private Date releaseTime;
 	private ReleaseType type;
 	private String minecraftArguments;
 	private List<Library> libraries;
@@ -32,17 +31,15 @@ public class CompleteVersion implements Version {
 	}
 
 	public CompleteVersion(CompleteVersion version) {
-		this(version.getId(), version.getReleaseTime(), version
+		this(version.getId(), version
 				.getUpdatedTime(), version.getType(), version.getMainClass(),
 				version.getMinecraftArguments());
 	}
 
-	public CompleteVersion(String id, Date releaseTime, Date updateTime,
+	public CompleteVersion(String id, Date updateTime,
 			ReleaseType type, String mainClass, String minecraftArguments) {
 		if ((id == null) || (id.length() == 0))
 			throw new IllegalArgumentException("ID cannot be null or empty");
-		if (releaseTime == null)
-			throw new IllegalArgumentException("Release time cannot be null");
 		if (updateTime == null)
 			throw new IllegalArgumentException("Update time cannot be null");
 		if (type == null)
@@ -55,7 +52,6 @@ public class CompleteVersion implements Version {
 					"Process arguments cannot be null or empty");
 
 		this.id = id;
-		this.releaseTime = releaseTime;
 		this.time = updateTime;
 		this.type = type;
 		this.mainClass = mainClass;
@@ -65,7 +61,7 @@ public class CompleteVersion implements Version {
 
 	public CompleteVersion(Version version, String mainClass,
 			String minecraftArguments) {
-		this(version.getId(), version.getReleaseTime(), version
+		this(version.getId(), version
 				.getUpdatedTime(), version.getType(), mainClass,
 				minecraftArguments);
 	}
@@ -140,11 +136,6 @@ public class CompleteVersion implements Version {
 
 	public int getMinimumLauncherVersion() {
 		return this.minimumLauncherVersion;
-	}
-
-	@Override
-	public Date getReleaseTime() {
-		return this.releaseTime;
 	}
 
 	public Collection<Library> getRelevantLibraries() {
@@ -237,13 +228,6 @@ public class CompleteVersion implements Version {
 
 	public void setMinimumLauncherVersion(int minimumLauncherVersion) {
 		this.minimumLauncherVersion = minimumLauncherVersion;
-	}
-
-	@Override
-	public void setReleaseTime(Date time) {
-		if (time == null)
-			throw new IllegalArgumentException("Time cannot be null");
-		this.releaseTime = time;
 	}
 
 	public void setSynced(boolean synced) {

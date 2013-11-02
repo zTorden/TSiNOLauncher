@@ -16,7 +16,6 @@ import net.minecraft.launcher.updater.download.Downloadable;
 public class CompleteModList implements Version {
 	private String id;
 	private Date time;
-	private Date releaseTime;
 	private ReleaseType type;
 	private List<Mod> mods;
 
@@ -30,11 +29,6 @@ public class CompleteModList implements Version {
 
 	public Collection<Mod> getMods() {
 		return this.mods;
-	}
-
-	@Override
-	public Date getReleaseTime() {
-		return this.releaseTime;
 	}
 
 	public Set<Downloadable> getRequiredDownloadables(OperatingSystem os,
@@ -80,13 +74,6 @@ public class CompleteModList implements Version {
 	@Override
 	public Date getUpdatedTime() {
 		return this.time;
-	}
-
-	@Override
-	public void setReleaseTime(Date time) {
-		if (time == null)
-			throw new IllegalArgumentException("Time cannot be null");
-		this.releaseTime = time;
 	}
 
 	@Override

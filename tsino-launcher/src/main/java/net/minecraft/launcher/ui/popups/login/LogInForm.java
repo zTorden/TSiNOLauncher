@@ -73,17 +73,6 @@ public class LogInForm extends JPanel implements ActionListener {
 		add(usernameLabel, constraints);
 		add(this.usernameField, constraints);
 
-		JLabel forgotUsernameLabel = new JLabel("(Справка)");
-		forgotUsernameLabel.setFont(smalltextFont);
-		forgotUsernameLabel.setHorizontalAlignment(4);
-		forgotUsernameLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				OperatingSystem.openLink(LauncherConstants.URL_FORGOT_USERNAME);
-			}
-		});
-		add(forgotUsernameLabel, constraints);
-
 		add(Box.createVerticalStrut(10), constraints);
 
 		JLabel passwordLabel = new JLabel("Пароль:");
