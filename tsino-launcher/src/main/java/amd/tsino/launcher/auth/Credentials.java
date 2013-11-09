@@ -1,19 +1,36 @@
 package amd.tsino.launcher.auth;
 
-import net.minecraft.launcher.Launcher;
-
 public class Credentials implements Cloneable {
-	public String selectedProfile;
-	public String password;
-	public boolean remember = true;
+    private String selectedProfile;
+    private String password;
+    private boolean remember = true;
 
-	@Override
-	public Credentials clone() {
-		try {
-			return (Credentials) super.clone();
-		} catch (CloneNotSupportedException e) {
-			Launcher.getInstance().getLog().error(e);
-			throw new RuntimeException(e);
-		}
-	}
+    @Override
+    public Credentials clone() throws CloneNotSupportedException {
+        return (Credentials) super.clone();
+    }
+
+    public String getUser() {
+        return selectedProfile;
+    }
+
+    public void setUser(String selectedProfile) {
+        this.selectedProfile = selectedProfile;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isRemember() {
+        return remember;
+    }
+
+    public void setRemember(boolean remember) {
+        this.remember = remember;
+    }
 }
