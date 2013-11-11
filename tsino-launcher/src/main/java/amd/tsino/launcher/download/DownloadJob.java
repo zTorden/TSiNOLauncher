@@ -3,53 +3,84 @@ package amd.tsino.launcher.download;
 import amd.tsino.launcher.LauncherConstants;
 import net.minecraft.launcher.Launcher;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class DownloadJob implements Runnable {
-    private Downloader downloader;
-    private ArrayList<JobListener> listeners = new ArrayList<JobListener>();
+public class DownloadJob implements Runnable, Downloadable {
+    private final Object lock = new Object();
+    private final ArrayList<JobListener> listeners = new ArrayList<>();
+    private final File file;
+    private final URL url;
 
-    public DownloadJob(Downloader downloader) {
-        this.downloader = downloader;
+    public DownloadJob(File file, URL url) {
+        this.file = file;
+        this.url = url;
+    }
+
+    public DownloadJob(Downloadable downloadable) {
+        this.file = downloadable.getFile();
+        this.url = downloadable.getURL();
     }
 
     private void fireStartedEvent() {
-        for (JobListener listener : listeners) {
-            listener.jobStarted(this);
+        synchronized (lock) {
+            for (JobListener listener : listeners) {
+                listener.jobStarted(this);
+            }
         }
     }
 
     private void fireFinishedEvent() {
-        for (JobListener listener : listeners) {
-            listener.jobFinished(this);
+        synchronized (lock) {
+            for (JobListener listener : listeners) {
+                listener.jobFinished(this);
+            }
         }
     }
 
     private void fireFailedEvent() {
-        for (JobListener listener : listeners) {
-            listener.jobFailed(this);
+        synchronized (lock) {
+            for (JobListener listener : listeners) {
+                listener.jobFailed(this);
+            }
         }
     }
 
-    public synchronized void addJobListener(JobListener listener) {
-        listeners.add(listener);
+    public void addJobListener(JobListener listener) {
+        synchronized (lock) {
+            listeners.add(listener);
+        }
     }
 
-    public synchronized void removeJobListener(
-            JobListener listener) {
-        listeners.remove(listener);
+    public void removeJobListener(JobListener listener) {
+        synchronized (lock) {
+            listeners.remove(listener);
+        }
+    }
+
+    @Override
+    public URL getURL() {
+        return url;
+    }
+
+    @Override
+    public File getFile() {
+        return file;
     }
 
     @Override
     public void run() {
-        try {
-            fireStartedEvent();
-            downloader.download(LauncherConstants.DOWNLOAD_RETRIES);
-            fireFinishedEvent();
-        } catch (IOException e) {
-            Launcher.getInstance().getLog().error(e);
-            fireFailedEvent();
+        synchronized (lock) {
+            try {
+                fireStartedEvent();
+                Downloader.download(this, LauncherConstants.DOWNLOAD_RETRIES);
+                fireFinishedEvent();
+            } catch (IOException e) {
+                Launcher.getInstance().getLog().error(e);
+                fireFailedEvent();
+            }
         }
     }
 }

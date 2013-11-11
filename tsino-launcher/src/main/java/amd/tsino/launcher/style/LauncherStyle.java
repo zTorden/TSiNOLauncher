@@ -1,9 +1,10 @@
 package amd.tsino.launcher.style;
 
 import amd.tsino.launcher.LauncherConstants;
+import amd.tsino.launcher.LauncherUtils;
+import amd.tsino.launcher.download.DownloadJob;
 import amd.tsino.launcher.download.Downloader;
 import com.google.gson.Gson;
-import net.minecraft.launcher.Launcher;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -15,15 +16,13 @@ import java.util.zip.ZipInputStream;
 public class LauncherStyle {
     private static final String STYLE_JSON = "style.json";
     private static final Charset STYLE_CHARSET = Charset.forName("utf-8");
-    private File styleZip;
+    private final File styleZip;
     private MainPanelStyle mainPanelStyle;
 
     public LauncherStyle() throws IOException {
-        styleZip = new File(Launcher.getInstance().getWorkDir(),
-                LauncherConstants.STYLE_ZIP);
-        Downloader downloader = new Downloader(LauncherConstants.STYLE_URL, styleZip);
-        downloader.download(3);
-        downloader.saveDatabase();
+        styleZip = LauncherUtils.getFile(LauncherConstants.STYLE_ZIP);
+        new DownloadJob(styleZip, LauncherConstants.STYLE_URL).run();
+        Downloader.saveDatabase();
         Reader reader = new InputStreamReader(getFile(STYLE_JSON),
                 STYLE_CHARSET);
         final Gson gson = new Gson();

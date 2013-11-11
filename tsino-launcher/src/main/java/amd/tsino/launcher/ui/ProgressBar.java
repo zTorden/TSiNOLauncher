@@ -1,22 +1,21 @@
 package amd.tsino.launcher.ui;
 
-import amd.tsino.launcher.style.Padding;
 import amd.tsino.launcher.style.ProgressBarStyle;
 import net.minecraft.launcher.Launcher;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicProgressBarUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
 public class ProgressBar extends JProgressBar {
-    private BufferedImage background;
-    private BufferedImage start;
-    private BufferedImage end;
-    private BufferedImage body;
-    private Padding padding;
-    private Dimension size;
+    private final BufferedImage background;
+    private final BufferedImage start;
+    private final BufferedImage end;
+    private final BufferedImage body;
+    private final Dimension size;
 
     public ProgressBar(ProgressBarStyle style)
             throws IOException {
@@ -24,14 +23,49 @@ public class ProgressBar extends JProgressBar {
         this.start = Launcher.getInstance().getStyle().getImage(style.start);
         this.end = Launcher.getInstance().getStyle().getImage(style.end);
         this.body = Launcher.getInstance().getStyle().getImage(style.body);
-        this.padding = style.padding;
         size = new Dimension(background.getWidth(), background.getHeight());
         setBounds(style.x, style.y, size.width, size.height);
+        setBorder(BorderFactory.createEmptyBorder(style.padding.top,
+                style.padding.left, style.padding.bottom, style.padding.right));
         setOpaque(false);
-    }
+        setUI(new BasicProgressBarUI() {
+            @Override
+            protected void paintDeterminate(Graphics g, JComponent c) {
+                g.drawImage(background, 0, 0, null);
 
-    private int getActiveLength() {
-        return getWidth() - (padding.left + padding.right);
+                Insets b = progressBar.getInsets(); // area for border
+                int barRectWidth = progressBar.getWidth() - (b.right + b.left);
+                int barRectHeight = progressBar.getHeight() - (b.top + b.bottom);
+                if (barRectWidth <= 0 || barRectHeight <= 0) return;
+
+                // amount of progress to draw
+                int amountFull = getAmountFull(b, barRectWidth, barRectHeight);
+                int length = amountFull - getMinLength();
+                if (length < 0) return;
+
+                g.drawImage(start, b.left, b.top, null);
+                if (length > 0) {
+                    g.drawImage(body, b.left + start.getWidth(), b.top, length, body.getHeight(), null);
+                }
+                g.drawImage(end, b.left + start.getWidth() + length, b.top, null);
+            }
+
+            @Override
+            protected void paintIndeterminate(Graphics g, JComponent c) {
+                g.drawImage(background, 0, 0, null);
+
+                // Paint the bouncing box.
+                boxRect = getBox(boxRect);
+                if (boxRect != null) {
+                    g.drawImage(start, boxRect.x, boxRect.y, null);
+                    int length = boxRect.width - getMinLength();
+                    if (length > 0) {
+                        g.drawImage(body, boxRect.x + start.getWidth(), boxRect.y, length, body.getHeight(), null);
+                    }
+                    g.drawImage(end, boxRect.x + boxRect.width - end.getWidth(), boxRect.y, null);
+                }
+            }
+        });
     }
 
     private int getMinLength() {
@@ -41,30 +75,5 @@ public class ProgressBar extends JProgressBar {
     @Override
     public Dimension getPreferredSize() {
         return size;
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        g.drawImage(background, 0, 0, null);
-        BoundedRangeModel model = getModel();
-        if (model.getValue() == model.getMinimum()) {
-            return;
-        }
-        int bodyLength = ((model.getValue() * getActiveLength()) / (model
-                .getMaximum() - model.getMinimum())) - getMinLength();
-        if (bodyLength <= 0) {
-            g.drawImage(start, padding.left, padding.top, null);
-            g.drawImage(end, padding.left + start.getWidth(), padding.top, null);
-        } else {
-            g.drawImage(start, padding.left, padding.top, null);
-            g.drawImage(body, padding.left + start.getWidth(), padding.top,
-                    bodyLength, body.getHeight(), null);
-            g.drawImage(end, padding.left + start.getWidth() + bodyLength,
-                    padding.top, null);
-        }
-    }
-
-    @Override
-    protected void paintBorder(Graphics g) {
     }
 }

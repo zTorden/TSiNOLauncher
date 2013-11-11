@@ -1,6 +1,8 @@
 package amd.tsino.launcher.download;
 
 import amd.tsino.bootstrap.EtagDatabase;
+import amd.tsino.launcher.LauncherUtils;
+import net.minecraft.launcher.Launcher;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,86 +12,86 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
-import static net.minecraft.launcher.Launcher.getInstance;
-
 public class Downloader {
-    private URL url;
-    private File file;
 
-    public Downloader(URL url, File file) {
-        this.url = url;
-        this.file = file;
+    private Downloader() {
     }
 
     private static String getEtag(HttpURLConnection connection) {
         return EtagDatabase.formatEtag(connection.getHeaderField("ETag"));
     }
 
-    private void download() throws IOException {
+    public static void saveDatabase() {
+        EtagDatabase.getInstance().saveDatabase();
+    }
+
+    private static void download(File file, URL url) throws IOException {
         String etag = EtagDatabase.getInstance().getEtag(file);
 
         try {
-            HttpURLConnection connection = makeConnection(etag);
+            HttpURLConnection connection = makeConnection(url, etag);
             int status = connection.getResponseCode();
 
             if (status == 304) {
-                getInstance()
-                        .getLog()
+                Launcher.getInstance().getLog()
                         .log("Using own copy as it matched etag: %s",
                                 file.getName());
             } else if (status / 100 == 2) {
+                long contentLength = connection.getContentLengthLong();
                 InputStream inputStream = connection.getInputStream();
                 FileOutputStream outputStream = new FileOutputStream(file);
                 String hash = EtagDatabase.copyAndDigest(inputStream,
                         outputStream);
+                long fileLength = file.length();
+                if (contentLength > 0 && fileLength != contentLength) {
+                    throw new IOException(String.format("File length does not match Content-Length: %d != %d", fileLength, contentLength));
+                }
                 etag = getEtag(connection);
                 EtagDatabase.getInstance().setEtag(file, etag, hash);
-                getInstance().getLog()
+                Launcher.getInstance().getLog()
                         .log("Downloaded: %s", file.getName());
             } else {
                 throw new IOException("Server responded with " + status);
             }
         } catch (IOException ex) {
             throw new IOException(String.format(
-                    "Couldn't connect to server (%s)", ex.getMessage()), ex);
+                    "Couldn't connect to server (%s, url: %s)", ex.getMessage(), url.toString()), ex);
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException("Missing Digest.MD5", ex);
         }
     }
 
-    public void download(int retryCount) throws IOException {
-        if (file.isDirectory()) {
-            throw new IOException("File is a directory: " + file.toString());
+    public static void download(Downloadable downloadable, int retries) throws IOException {
+        if (downloadable.getFile().isDirectory()) {
+            throw new IOException("File is a directory: " + downloadable.getFile().toString());
         }
 
-        if (file.getParentFile() != null) {
-            if (!file.getParentFile().isDirectory()) {
-                final boolean created = file.getParentFile().mkdirs();
-                if (created) {
-                    getInstance().getLog().log("Directory created: %s", file.getParentFile().getPath());
-                }
-            }
+        if (downloadable.getFile().getParentFile() != null) {
+            LauncherUtils.createDir(downloadable.getFile().getParentFile());
         }
 
-        for (int i = 0; i < retryCount; i++) {
+        for (int i = 0; i < retries; i++) {
             try {
-                download();
+                download(downloadable.getFile(), downloadable.getURL());
                 return;
             } catch (IOException ex) {
-                getInstance().getLog().error(ex);
+                Launcher.getInstance().getLog().error(ex);
             }
         }
 
-        if (file.isFile()) {
-            getInstance().getLog()
-                    .log("Assuming our copy is good: %s", file.toString());
+        if (downloadable.getFile().isFile()) {
+            Launcher.getInstance().getLog()
+                    .log("Assuming our copy is good: %s", downloadable.getFile().toString());
+        } else {
+            Launcher.getInstance().getLog()
+                    .log("Download failed: %s", downloadable.getFile().toString());
+            throw new IOException("Download failed");
         }
     }
 
-    private HttpURLConnection makeConnection(String localEtag)
+    private static HttpURLConnection makeConnection(URL url, String localEtag)
             throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url
-                .openConnection(getInstance().getProxy());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection(Launcher.getInstance().getProxy());
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(10000);
         connection.setUseCaches(false);
@@ -104,9 +106,5 @@ public class Downloader {
         }
         connection.connect();
         return connection;
-    }
-
-    public void saveDatabase() {
-        EtagDatabase.getInstance().saveDatabase();
     }
 }

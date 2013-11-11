@@ -9,17 +9,21 @@ import java.awt.*;
 import java.io.IOException;
 
 public class LauncherFrame {
-    private JFrame frame;
+    private final JFrame frame;
     private MainPanel mainPanel;
 
     public LauncherFrame(JFrame frame) throws IOException {
         this.frame = frame;
+
+        SetSystemLookAndFeel();
 
         mainPanel = new MainPanel(Launcher.getInstance().getStyle()
                 .getMainPanelStyle());
         mainPanel.setVisible(true);
 
         frame.setVisible(false);
+        String text = ((JTextArea) ((JScrollPane) frame.getContentPane().getComponent(0)).getViewport().getComponent(0)).getText();
+        Launcher.getInstance().getLog().setBootstrapLog(text);
         frame.getContentPane().removeAll();
         frame.setBackground(Color.DARK_GRAY);
         frame.add(mainPanel);
@@ -28,6 +32,14 @@ public class LauncherFrame {
         frame.setLocationRelativeTo(null);
         frame.getRootPane().setDefaultButton(mainPanel.getAuth().getEnter());
         frame.setVisible(true);
+    }
+
+    private static void SetSystemLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            Launcher.getInstance().getLog().error(e);
+        }
     }
 
     public void close() {
@@ -48,11 +60,7 @@ public class LauncherFrame {
                 LauncherConstants.UPDATE_BUTTONS[1]);
 
         if (result < LauncherConstants.UPDATE_URLS.length - 1) {
-            try {
-                LauncherUtils.openLink(LauncherConstants.UPDATE_URLS[result].toURI());
-            } catch (Exception e) {
-                Launcher.getInstance().getLog().error(e);
-            }
+            LauncherUtils.openLink(LauncherConstants.UPDATE_URLS[result]);
         }
     }
 
@@ -64,5 +72,13 @@ public class LauncherFrame {
         int result = JOptionPane.showConfirmDialog(frame, message,
                 "Offline", JOptionPane.YES_NO_OPTION);
         return result == 0;
+    }
+
+    public void showDownloadFailedNotice() {
+        String message = "<html>Извините, не удалось скачать все необходимые файлы.<br>" +
+                "Проверьте Ваше интернет-соединение.</html>";
+
+        JOptionPane.showMessageDialog(frame, new ErrorPanel(message),
+                "Download failed", JOptionPane.WARNING_MESSAGE);
     }
 }

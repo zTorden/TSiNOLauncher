@@ -1,5 +1,7 @@
 package amd.tsino.launcher.ui;
 
+import amd.tsino.launcher.LauncherConstants;
+import amd.tsino.launcher.LauncherUtils;
 import amd.tsino.launcher.auth.Credentials;
 import amd.tsino.launcher.style.AuthPanelStyle;
 import net.minecraft.launcher.Launcher;
@@ -61,21 +63,17 @@ public class AuthPanel extends ImagePanel {
 
         setCredentials(Launcher.getInstance().getAuth().getCredentials());
 
-        enter.addActionListener(new ActionListener() {
+        register.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Launcher.getInstance().launch();
+                LauncherUtils.openLink(LauncherConstants.REGISTER_URL);
             }
         });
     }
 
     @SuppressWarnings("deprecation")
     public Credentials getCredentials() {
-        Credentials crd = new Credentials();
-        crd.setUser(login.getText());
-        crd.setPassword(password.getText());
-        crd.setRemember(check.isSelected());
-        return crd;
+        return new Credentials(login.getText(), password.getText(), check.isSelected());
     }
 
     public void setCredentials(Credentials crd) {
@@ -86,6 +84,14 @@ public class AuthPanel extends ImagePanel {
 
     public Button getEnter() {
         return enter;
+    }
+
+    public void enableAuth(boolean enable) {
+        login.setEnabled(enable);
+        password.setEnabled(enable);
+        check.setEnabled(enable);
+        enter.setEnabled(enable);
+        register.setEnabled(enable);
     }
 
     public void showLoginError() {

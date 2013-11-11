@@ -4,55 +4,52 @@ import amd.tsino.launcher.LauncherConstants;
 import net.minecraft.launcher.Launcher;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class DownloadManager {
-    private final Object thisLock = new Object();
-    private ExecutorService executor;
-    private JobListener jobListener = new JobListener();
-    private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
+    private final Object lock = new Object();
+    private final ExecutorService executor;
+    private final JobListener jobListener = new JobListener();
+    private final ArrayList<UpdateListener> listeners = new ArrayList<>();
+    private ArrayList<DownloadJob> failedJobs = new ArrayList<>();
     private int total;
     private int finished;
-    private int failed;
 
     public DownloadManager() {
         executor = Executors.newFixedThreadPool(LauncherConstants.DOWNLOAD_THREADS);
     }
 
-    public void addDownload(Downloader downloader) {
-        synchronized (thisLock) {
+    public void addDownload(DownloadJob job) {
+        synchronized (lock) {
             total++;
             fireUpdatedEvent();
         }
-        DownloadJob job = new DownloadJob(downloader);
         job.addJobListener(jobListener);
         executor.execute(job);
     }
 
-    public void shutdown() {
-        try {
-            executor.awaitTermination(1, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            Launcher.getInstance().getLog().error(e);
-        }
+    public void addDownload(Downloadable downloadable) {
+        addDownload(new DownloadJob(downloadable));
     }
 
     public void addUpdateListener(UpdateListener listener) {
-        synchronized (thisLock) {
+        synchronized (lock) {
             listeners.add(listener);
         }
     }
 
     public void removeUpdateListener(UpdateListener listener) {
-        synchronized (thisLock) {
+        synchronized (lock) {
             listeners.remove(listener);
         }
     }
 
     public void fireUpdatedEvent() {
-        synchronized (thisLock) {
+        synchronized (lock) {
+            lock.notifyAll();
             for (UpdateListener listener : listeners) {
                 listener.updated(this);
             }
@@ -60,30 +57,51 @@ public class DownloadManager {
     }
 
     public void reset() {
-        shutdown();
-        synchronized (thisLock) {
-            failed = 0;
+        synchronized (lock) {
+            waitFinish();
             finished = 0;
             total = 0;
+            failedJobs = new ArrayList<>();
             fireUpdatedEvent();
         }
     }
 
+    public void waitFinish() {
+        while (true) {
+            synchronized (lock) {
+                if (getFinished() + getFailed() == total) {
+                    break;
+                }
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Launcher.getInstance().getLog().error(e);
+                }
+            }
+        }
+    }
+
     public int getTotal() {
-        synchronized (thisLock) {
+        synchronized (lock) {
             return total;
         }
     }
 
     public int getFinished() {
-        synchronized (thisLock) {
+        synchronized (lock) {
             return finished;
         }
     }
 
     public int getFailed() {
-        synchronized (thisLock) {
-            return failed;
+        synchronized (lock) {
+            return failedJobs.size();
+        }
+    }
+
+    public List<DownloadJob> getFailedJobs() {
+        synchronized (lock) {
+            return Collections.unmodifiableList(failedJobs);
         }
     }
 
@@ -94,7 +112,7 @@ public class DownloadManager {
 
         @Override
         public void jobFinished(DownloadJob job) {
-            synchronized (thisLock) {
+            synchronized (lock) {
                 finished++;
                 fireUpdatedEvent();
             }
@@ -102,8 +120,8 @@ public class DownloadManager {
 
         @Override
         public void jobFailed(DownloadJob job) {
-            synchronized (thisLock) {
-                failed++;
+            synchronized (lock) {
+                failedJobs.add(job);
                 fireUpdatedEvent();
             }
         }

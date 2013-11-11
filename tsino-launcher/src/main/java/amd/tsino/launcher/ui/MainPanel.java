@@ -5,6 +5,8 @@ import amd.tsino.launcher.download.UpdateListener;
 import amd.tsino.launcher.style.MainPanelStyle;
 import net.minecraft.launcher.Launcher;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
@@ -23,12 +25,25 @@ public class MainPanel extends ImagePanel {
         Launcher.getInstance().getDownloads().addUpdateListener(new UpdateListener() {
             @Override
             public void updated(DownloadManager manager) {
-                progress.setMinimum(0);
                 progress.setMaximum(manager.getTotal());
                 progress.setValue(manager.getFinished() + manager.getFailed());
-                if (progress.getValue() == progress.getMaximum()) {
-                    progress.setVisible(false);
-                }
+            }
+        });
+
+        auth.getEnter().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                auth.enableAuth(false);
+                progress.setIndeterminate(true);
+                progress.setVisible(true);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Launcher.getInstance().launch();
+                        progress.setVisible(false);
+                        auth.enableAuth(true);
+                    }
+                }).start();
             }
         });
 

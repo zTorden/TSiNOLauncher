@@ -13,40 +13,35 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.security.spec.KeySpec;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class AuthenticationData {
-    private static final String AUTH_JSON = "launcher_profiles.json";
-    private static final Charset AUTH_CHARSET = Charset.forName("utf-8");
     private static final String ALGORITHM = "PBEWithMD5AndDES";
-    private static final int SALT_SEED = 0x23571113;
+    private static final byte[] SALT = new byte[]{2, 3, 5, 7, 11, 13, 17, 19};
     private static final int PBE_ITERATIONS = 7;
     private Credentials credentials;
 
-    public AuthenticationData() throws IOException {
-        Reader reader = new InputStreamReader(new FileInputStream(getFile()),
-                AUTH_CHARSET);
-        final Gson gson = new Gson();
-        Credentials crd = gson.fromJson(reader, Credentials.class);
-        if (crd.getPassword() != null) {
-            decrypt(crd);
-        }
-        reader.close();
+    public AuthenticationData() {
         try {
-            credentials = crd.clone();
-        } catch (CloneNotSupportedException e) {
+            Reader reader = new InputStreamReader(new FileInputStream(getFile()),
+                    LauncherConstants.DEFAULT_CHARSET);
+            final Gson gson = new Gson();
+            Credentials crd = gson.fromJson(reader, Credentials.class);
+            reader.close();
+            credentials = decrypt(crd);
+            return;
+        } catch (FileNotFoundException e) {
+            Launcher.getInstance().getLog().log("No authentication data found.");
+        } catch (Exception e) {
             Launcher.getInstance().getLog().error(e);
         }
+        credentials = new Credentials();
     }
 
     private static Cipher getCipher(int mode, String password) throws Exception {
-        byte[] salt = new byte[8];
-        new Random(SALT_SEED).nextBytes(salt);
-        PBEParameterSpec paramSpec = new PBEParameterSpec(salt, PBE_ITERATIONS);
+        PBEParameterSpec paramSpec = new PBEParameterSpec(SALT, PBE_ITERATIONS);
         KeySpec keySpec = new PBEKeySpec(password.toCharArray());
         SecretKey key = SecretKeyFactory.getInstance(ALGORITHM).generateSecret(
                 keySpec);
@@ -55,49 +50,42 @@ public class AuthenticationData {
         return cipher;
     }
 
-    private static void decrypt(Credentials crd) {
-        try {
-            byte[] data = Base64.decodeBase64(crd.getPassword());
-            Cipher cipher = getCipher(Cipher.DECRYPT_MODE, crd.getUser());
-            data = cipher.doFinal(data);
-            crd.setPassword(new String(data, AUTH_CHARSET));
-        } catch (Exception ex) {
-            crd.setPassword(null);
-            Launcher.getInstance().getLog().error(ex);
+    private static Credentials decrypt(Credentials crd) {
+        if (crd.getPassword() != null) {
+            try {
+                byte[] data = Base64.decodeBase64(crd.getPassword());
+                Cipher cipher = getCipher(Cipher.DECRYPT_MODE, crd.getUser());
+                data = cipher.doFinal(data);
+                return new Credentials(crd.getUser(), new String(data, LauncherConstants.DEFAULT_CHARSET), crd.isRemember());
+            } catch (Exception ex) {
+                Launcher.getInstance().getLog().error(ex);
+            }
         }
+        return new Credentials(crd.getUser(), null, crd.isRemember());
     }
 
-    private static void encrypt(Credentials crd) {
-        try {
-            Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, crd.getUser());
-            byte[] data = crd.getPassword().getBytes(AUTH_CHARSET);
-            data = cipher.doFinal(data);
-            crd.setPassword(Base64.encodeBase64String(data));
-        } catch (Exception ex) {
-            crd.setPassword(null);
-            Launcher.getInstance().getLog().error(ex);
+    private static Credentials encrypt(Credentials crd) {
+        if (crd.isRemember()) {
+            try {
+                Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, crd.getUser());
+                byte[] data = crd.getPassword().getBytes(LauncherConstants.DEFAULT_CHARSET);
+                data = cipher.doFinal(data);
+                return new Credentials(crd.getUser(), Base64.encodeBase64String(data), crd.isRemember());
+            } catch (Exception ex) {
+                Launcher.getInstance().getLog().error(ex);
+            }
         }
+        return new Credentials(crd.getUser(), null, crd.isRemember());
     }
 
     private static File getFile() {
-        return new File(Launcher.getInstance().getWorkDir(), AUTH_JSON);
+        return LauncherUtils.getFile(LauncherConstants.AUTH_JSON);
     }
 
     public void save() throws IOException {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Writer writer = new OutputStreamWriter(new FileOutputStream(getFile()));
-        Credentials crd;
-        try {
-            crd = credentials.clone();
-        } catch (CloneNotSupportedException e) {
-            Launcher.getInstance().getLog().error(e);
-            return;
-        }
-        if (crd.isRemember()) {
-            encrypt(crd);
-        } else {
-            crd.setPassword(null);
-        }
+        Writer writer = new OutputStreamWriter(new FileOutputStream(getFile()), LauncherConstants.DEFAULT_CHARSET);
+        Credentials crd = encrypt(credentials);
         writer.write(gson.toJson(crd));
         writer.close();
     }
@@ -111,7 +99,7 @@ public class AuthenticationData {
     }
 
     public String requestSessionID() throws AuthenticationException {
-        Map<String, Object> query = new HashMap<String, Object>();
+        Map<String, Object> query = new HashMap<>();
         query.put("user", credentials.getUser());
         query.put("password", credentials.getPassword());
         query.put("version", LauncherConstants.VERSION_NUMERIC);

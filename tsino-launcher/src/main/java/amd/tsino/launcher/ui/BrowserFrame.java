@@ -24,11 +24,7 @@ public class BrowserFrame extends JTextPane {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent he) {
                 if (he.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    try {
-                        LauncherUtils.openLink(he.getURL().toURI());
-                    } catch (Exception e) {
-                        Launcher.getInstance().getLog().error(e);
-                    }
+                    LauncherUtils.openLink(he.getURL());
                 }
             }
         });

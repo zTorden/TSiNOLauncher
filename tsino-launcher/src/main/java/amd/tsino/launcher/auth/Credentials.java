@@ -1,36 +1,31 @@
 package amd.tsino.launcher.auth;
 
-public class Credentials implements Cloneable {
-    private String selectedProfile;
-    private String password;
-    private boolean remember = true;
+public class Credentials {
+    private final String selectedProfile;
+    private final String password;
+    private final boolean remember;
 
-    @Override
-    public Credentials clone() throws CloneNotSupportedException {
-        return (Credentials) super.clone();
+    public Credentials() {
+        selectedProfile = "";
+        password = "";
+        remember = true;
+    }
+
+    public Credentials(String user, String password, boolean remember) {
+        this.selectedProfile = user;
+        this.password = password;
+        this.remember = remember;
     }
 
     public String getUser() {
         return selectedProfile;
     }
 
-    public void setUser(String selectedProfile) {
-        this.selectedProfile = selectedProfile;
-    }
-
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public boolean isRemember() {
         return remember;
-    }
-
-    public void setRemember(boolean remember) {
-        this.remember = remember;
     }
 }

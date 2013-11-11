@@ -23,10 +23,10 @@ public class TextField extends JPasswordField {
         setBounds(style.x, style.y, size.width, size.height);
         setBorder(BorderFactory.createEmptyBorder(style.padding.top,
                 style.padding.left, style.padding.bottom, style.padding.right));
+        setOpaque(false);
         setFont(new Font(style.font, 0, style.size));
         setForeground(Color.decode(style.color));
         setToolTipText(style.tooltip);
-        setOpaque(false);
 
         if (!password) {
             setEchoChar('\0');

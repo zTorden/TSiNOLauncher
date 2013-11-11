@@ -1,16 +1,21 @@
 package amd.tsino.launcher;
 
+import net.minecraft.launcher.Launcher;
+
 import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 public class LauncherUtils {
-    public static void openLink(URI link) throws Exception {
-        Class<?> desktopClass = Class.forName("java.awt.Desktop");
-        Object o = desktopClass.getMethod("getDesktop", new Class[0]).invoke(
-                null, new Object());
-        desktopClass.getMethod("browse", new Class[]{URI.class}).invoke(o, link);
+    public static void openLink(URL link) {
+        try {
+            Class<?> desktopClass = Class.forName("java.awt.Desktop");
+            Object o = desktopClass.getMethod("getDesktop", new Class[0]).invoke(
+                    null);
+            desktopClass.getMethod("browse", new Class[]{URI.class}).invoke(o, link.toURI());
+        } catch (Exception e) {
+            Launcher.getInstance().getLog().error(e);
+        }
     }
 
     public static String buildQuery(Map<String, Object> query)
@@ -33,19 +38,11 @@ public class LauncherUtils {
         return builder.toString();
     }
 
-    public static URL constantURL(String input) {
-        try {
-            return new URL(input);
-        } catch (MalformedURLException e) {
-            throw new Error(e);
-        }
-    }
-
     public static String performPost(URL url, String parameters, Proxy proxy,
                                      String contentType, boolean returnErrorPage) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url
                 .openConnection(proxy);
-        byte[] paramAsBytes = parameters.getBytes(Charset.forName("UTF-8"));
+        byte[] paramAsBytes = parameters.getBytes(LauncherConstants.DEFAULT_CHARSET);
 
         connection.setConnectTimeout(LauncherConstants.DOWNLOAD_TIMEOUT);
         connection.setReadTimeout(LauncherConstants.DOWNLOAD_TIMEOUT);
@@ -66,12 +63,12 @@ public class LauncherUtils {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+                    connection.getInputStream(), LauncherConstants.DEFAULT_CHARSET));
         } catch (IOException e) {
             if (returnErrorPage) {
                 InputStream stream = connection.getErrorStream();
                 if (stream != null)
-                    reader = new BufferedReader(new InputStreamReader(stream));
+                    reader = new BufferedReader(new InputStreamReader(stream, LauncherConstants.DEFAULT_CHARSET));
                 else
                     throw e;
             } else {
@@ -92,5 +89,35 @@ public class LauncherUtils {
                                      Proxy proxy) throws IOException {
         return performPost(url, buildQuery(query), proxy,
                 "application/x-www-form-urlencoded", false);
+    }
+
+    public static String getOperatingSystem() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) return "windows";
+        if (osName.contains("mac")) return "osx";
+        if (osName.contains("linux") || osName.contains("unix")) return "linux";
+        return "unknown";
+    }
+
+    public static void createDir(File dir) {
+        if (!dir.isDirectory()) {
+            final boolean created = dir.mkdirs();
+            if (created) {
+                Launcher.getInstance().getLog().log("Directory created: %s", dir.getPath());
+            }
+        }
+    }
+
+    public static URL getURL(String input) {
+        try {
+            return new URL(input);
+        } catch (MalformedURLException e) {
+            Launcher.getInstance().getLog().error(e);
+            throw new Error(e);
+        }
+    }
+
+    public static File getFile(String name) {
+        return new File(Launcher.getInstance().getWorkDir(), name);
     }
 }
