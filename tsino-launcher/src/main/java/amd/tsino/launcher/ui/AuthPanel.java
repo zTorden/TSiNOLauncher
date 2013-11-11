@@ -76,7 +76,7 @@ public class AuthPanel extends ImagePanel {
         return new Credentials(login.getText(), password.getText(), check.isSelected());
     }
 
-    public void setCredentials(Credentials crd) {
+    void setCredentials(Credentials crd) {
         login.setText(crd.getUser());
         password.setText(crd.getPassword());
         check.setSelected(crd.isRemember());

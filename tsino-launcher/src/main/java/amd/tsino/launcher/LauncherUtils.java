@@ -4,7 +4,10 @@ import net.minecraft.launcher.Launcher;
 
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class LauncherUtils {
     public static void openLink(URL link) {
@@ -18,7 +21,7 @@ public class LauncherUtils {
         }
     }
 
-    public static String buildQuery(Map<String, Object> query)
+    private static String buildQuery(Map<String, Object> query)
             throws UnsupportedEncodingException {
         StringBuilder builder = new StringBuilder();
 
@@ -38,8 +41,8 @@ public class LauncherUtils {
         return builder.toString();
     }
 
-    public static String performPost(URL url, String parameters, Proxy proxy,
-                                     String contentType, boolean returnErrorPage) throws IOException {
+    private static String performPost(URL url, String parameters, Proxy proxy,
+                                      String contentType, boolean returnErrorPage) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url
                 .openConnection(proxy);
         byte[] paramAsBytes = parameters.getBytes(LauncherConstants.DEFAULT_CHARSET);
@@ -119,5 +122,40 @@ public class LauncherUtils {
 
     public static File getFile(String name) {
         return new File(Launcher.getInstance().getWorkDir(), name);
+    }
+
+    public static void unzip(File zip, File dir, List<String> exclude) throws IOException {
+        LauncherUtils.createDir(dir);
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                String fileName = ze.getName();
+                boolean extract = true;
+                if (exclude != null) {
+                    for (String prefix : exclude) {
+                        if (fileName.startsWith(prefix)) {
+                            extract = false;
+                            break;
+                        }
+                    }
+                }
+                if (extract) {
+                    File newFile = new File(dir, fileName);
+                    Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
+                    if (ze.isDirectory()) {
+                        LauncherUtils.createDir(newFile);
+                    } else {
+                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                            int len;
+                            byte[] buffer = new byte[4096];
+                            while ((len = zis.read(buffer)) > 0) {
+                                fos.write(buffer, 0, len);
+                            }
+                        }
+                    }
+                }
+                ze = zis.getNextEntry();
+            }
+        }
     }
 }

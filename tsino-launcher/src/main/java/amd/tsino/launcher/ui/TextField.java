@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class TextField extends JPasswordField {
+class TextField extends JPasswordField {
     private BufferedImage normal;
     private BufferedImage hover;
     private Dimension size;

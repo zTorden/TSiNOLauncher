@@ -13,7 +13,7 @@ public class LauncherVersion {
     private final ModFiles modFiles = new ModFiles();
     private final CustomFiles customFiles = new CustomFiles();
 
-    public void addArtifacts(ArtifactList artifactList) {
+    void addArtifacts(ArtifactList artifactList) {
         List<? extends Downloadable> list = artifactList.getArtifacts();
         if (list == null || list.size() == 0) {
             logNoFiles(artifactList);

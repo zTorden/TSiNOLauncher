@@ -81,7 +81,7 @@ public class Launcher {
             return;
         } catch (AuthenticationException e) {
             log.error(e);
-            if (!frame.showOfflineNotice()) {
+            if (frame.showOfflineNotice() != 0) {
                 return;
             }
         } catch (IOException e) {

@@ -47,7 +47,7 @@ public class DownloadManager {
         }
     }
 
-    public void fireUpdatedEvent() {
+    void fireUpdatedEvent() {
         synchronized (lock) {
             lock.notifyAll();
             for (UpdateListener listener : listeners) {

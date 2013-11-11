@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 
 @SuppressWarnings("serial")
-public class BrowserFrame extends JTextPane {
+class BrowserFrame extends JTextPane {
     public BrowserFrame(BrowserPanelStyle style) throws IOException {
         setEditable(false);
         setFocusable(false);

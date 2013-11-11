@@ -6,8 +6,6 @@ import amd.tsino.launcher.download.Downloadable;
 import net.minecraft.launcher.Launcher;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class Library implements Downloadable {
     private final String name;
@@ -40,34 +36,8 @@ public class Library implements Downloadable {
         this.url = url;
     }
 
-    public static void unzip(File zip, File dir, ExtractRule extract) throws IOException {
-        LauncherUtils.createDir(dir);
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                String fileName = ze.getName();
-                if (extract == null || extract.shouldExtract(fileName)) {
-                    File newFile = new File(dir, fileName);
-                    Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
-                    if (ze.isDirectory()) {
-                        LauncherUtils.createDir(newFile);
-                    } else {
-                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                            int len;
-                            byte[] buffer = new byte[4096];
-                            while ((len = zis.read(buffer)) > 0) {
-                                fos.write(buffer, 0, len);
-                            }
-                        }
-                    }
-                }
-                ze = zis.getNextEntry();
-            }
-        }
-    }
-
     public void extractFiles(File dir) throws IOException {
-        unzip(getFile(), dir, extract);
+        LauncherUtils.unzip(getFile(), dir, extract.getExclude());
     }
 
     private String getFileName() {
@@ -190,15 +160,8 @@ public class Library implements Downloadable {
             exclude = null;
         }
 
-        public boolean shouldExtract(String path) {
-            if (exclude != null) {
-                for (String line : exclude) {
-                    if (path.startsWith(line)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+        public List<String> getExclude() {
+            return exclude;
         }
     }
 }

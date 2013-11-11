@@ -5,7 +5,7 @@ import amd.tsino.launcher.style.NewsPanelStyle;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class NewsPanel extends ImagePanel {
+class NewsPanel extends ImagePanel {
     public NewsPanel(NewsPanelStyle style) throws IOException {
         super(style);
         setLayout(null);

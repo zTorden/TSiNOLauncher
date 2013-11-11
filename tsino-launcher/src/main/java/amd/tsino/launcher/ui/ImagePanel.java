@@ -9,11 +9,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class ImagePanel extends JPanel {
+class ImagePanel extends JPanel {
     private BufferedImage background;
     private Dimension size;
 
-    public ImagePanel(ImagePanelStyle style) throws IOException {
+    ImagePanel(ImagePanelStyle style) throws IOException {
         this.background = Launcher.getInstance().getStyle()
                 .getImage(style.background);
         size = new Dimension(background.getWidth(), background.getHeight());

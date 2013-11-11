@@ -5,7 +5,7 @@ import net.minecraft.launcher.Launcher;
 import javax.swing.*;
 import java.awt.*;
 
-public class ErrorPanel extends JPanel {
+class ErrorPanel extends JPanel {
     public ErrorPanel(String message) {
         JTextArea area = new JTextArea();
         area.setText(Launcher.getInstance().getLog().getDump());

@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class CheckButton extends JCheckBox {
+class CheckButton extends JCheckBox {
     private BufferedImage true_normal;
     private BufferedImage true_hover;
     private BufferedImage true_click;

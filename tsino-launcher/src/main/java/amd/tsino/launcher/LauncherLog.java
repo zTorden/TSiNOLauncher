@@ -20,7 +20,7 @@ public class LauncherLog {
         pw.printf(format, args);
     }
 
-    public void error(String format, Object... args) {
+    void error(String format, Object... args) {
         log("[ERROR] " + format, args);
     }
 

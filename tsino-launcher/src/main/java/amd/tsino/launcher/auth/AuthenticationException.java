@@ -3,23 +3,23 @@ package amd.tsino.launcher.auth;
 @SuppressWarnings("serial")
 public class AuthenticationException extends Exception {
 
-    public AuthenticationException() {
+    AuthenticationException() {
     }
 
     public AuthenticationException(String message) {
         super(message);
     }
 
-    public AuthenticationException(Throwable cause) {
+    AuthenticationException(Throwable cause) {
         super(cause);
     }
 
-    public AuthenticationException(String message, Throwable cause) {
+    AuthenticationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public AuthenticationException(String message, Throwable cause,
-                                   boolean enableSuppression, boolean writableStackTrace) {
+    AuthenticationException(String message, Throwable cause,
+                            boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

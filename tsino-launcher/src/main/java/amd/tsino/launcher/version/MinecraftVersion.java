@@ -3,7 +3,7 @@ package amd.tsino.launcher.version;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MinecraftVersion {
+class MinecraftVersion {
     private final String id;
     private final String mainClass;
     private final String minecraftArguments;

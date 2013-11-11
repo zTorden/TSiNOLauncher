@@ -64,14 +64,13 @@ public class LauncherFrame {
         }
     }
 
-    public boolean showOfflineNotice() {
+    public int showOfflineNotice() {
         String message = "Извините, не удалось подключиться к серверу.\n" +
                 "Проверьте Ваше интернет-соединение.\n\n" +
                 "Попытаться запустить игру в оффлайн режиме?";
 
-        int result = JOptionPane.showConfirmDialog(frame, message,
+        return JOptionPane.showConfirmDialog(frame, message,
                 "Offline", JOptionPane.YES_NO_OPTION);
-        return result == 0;
     }
 
     public void showDownloadFailedNotice() {
