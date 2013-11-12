@@ -1,5 +1,6 @@
 package net.minecraft.launcher;
 
+import amd.tsino.launcher.GameLauncher;
 import amd.tsino.launcher.LauncherConstants;
 import amd.tsino.launcher.LauncherLog;
 import amd.tsino.launcher.auth.AuthenticationData;
@@ -50,6 +51,10 @@ public class Launcher {
         return instance;
     }
 
+    private static String quote(String s) {
+        return "'" + s + "'";
+    }
+
     public Proxy getProxy() {
         return proxy;
     }
@@ -67,13 +72,12 @@ public class Launcher {
     }
 
     public void launch() {
-        auth.setCredentials(frame.getMainPanel().getAuth().getCredentials());
-        String sessionID = null;
+        String sessionID = "null";
         try {
             sessionID = auth.requestSessionID();
             auth.save();
         } catch (InvalidCredentialsException e) {
-            frame.getMainPanel().getAuth().showLoginError();
+            frame.showLoginError();
             return;
         } catch (UpdateLauncherException e) {
             log.error(e);
@@ -93,7 +97,6 @@ public class Launcher {
         log.log("Starting downloads...");
         LauncherVersion v = new LauncherVersion();
         v.updateArtifactLists();
-        frame.getMainPanel().getProgress().setIndeterminate(false);
         v.downloadArtifacts();
         downloads.waitFinish();
         Downloader.saveDatabase();
@@ -106,11 +109,16 @@ public class Launcher {
         log.log("Extracting files...");
         v.extractFiles();
 
-        log.log("Starting game...");
-        launchGame();
-    }
+        frame.hide();
 
-    private void launchGame() {
+        log.log("Starting game...");
+        try {
+            GameLauncher.launchGame(v.getVersionFiles(), sessionID);
+        } catch (Exception e) {
+            log.error(e);
+            frame.showLaunchFailedNotice();
+        }
+        System.exit(0);
     }
 
     public AuthenticationData getAuth() {

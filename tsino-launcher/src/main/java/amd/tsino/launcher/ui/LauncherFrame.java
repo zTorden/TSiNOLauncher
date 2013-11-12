@@ -22,6 +22,8 @@ public class LauncherFrame {
         mainPanel.setVisible(true);
 
         frame.setVisible(false);
+        frame.setTitle(LauncherConstants.LAUNCHER_TITLE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         String text = ((JTextArea) ((JScrollPane) frame.getContentPane().getComponent(0)).getViewport().getComponent(0)).getText();
         Launcher.getInstance().getLog().setBootstrapLog(text);
         frame.getContentPane().removeAll();
@@ -42,12 +44,22 @@ public class LauncherFrame {
         }
     }
 
-    public void close() {
-        frame.dispose();
+    public void hide() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                frame.setVisible(false);
+            }
+        });
     }
 
-    public MainPanel getMainPanel() {
-        return mainPanel;
+    public void showLoginError() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                mainPanel.getAuth().showLoginError();
+            }
+        });
     }
 
     public void showOutdatedNotice() {
@@ -74,10 +86,18 @@ public class LauncherFrame {
     }
 
     public void showDownloadFailedNotice() {
-        String message = "<html>Извините, не удалось скачать все необходимые файлы.<br>" +
-                "Проверьте Ваше интернет-соединение.</html>";
-
+        String message = "<html>Извините, не удалось скачать все необходимые файлы." +
+                "<br>Проверьте Ваше интернет-соединение." +
+                "<br><br>Журнал событий:</html>";
         JOptionPane.showMessageDialog(frame, new ErrorPanel(message),
                 "Download failed", JOptionPane.WARNING_MESSAGE);
+    }
+
+    public void showLaunchFailedNotice() {
+        String message = "<html>Извините, произошла ошибка." +
+                "<br>Пожалуйста, перезапустите лаунчер." +
+                "<br><br>Журнал событий:</html>";
+        JOptionPane.showMessageDialog(frame, new ErrorPanel(message),
+                "Launch failed", JOptionPane.WARNING_MESSAGE);
     }
 }

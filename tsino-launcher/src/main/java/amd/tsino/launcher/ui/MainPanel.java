@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class MainPanel extends ImagePanel {
+class MainPanel extends ImagePanel {
     private AuthPanel auth;
     private ProgressBar progress;
 
@@ -25,6 +25,7 @@ public class MainPanel extends ImagePanel {
         Launcher.getInstance().getDownloads().addUpdateListener(new UpdateListener() {
             @Override
             public void updated(DownloadManager manager) {
+                progress.setIndeterminate(manager.getTotal() < 2);
                 progress.setMaximum(manager.getTotal());
                 progress.setValue(manager.getFinished() + manager.getFailed());
             }
@@ -34,14 +35,18 @@ public class MainPanel extends ImagePanel {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 auth.enableAuth(false);
-                progress.setIndeterminate(true);
+                Launcher.getInstance().getAuth().setCredentials(auth.getCredentials());
                 progress.setVisible(true);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Launcher.getInstance().launch();
-                        progress.setVisible(false);
-                        auth.enableAuth(true);
+                        try {
+                            Launcher.getInstance().launch();
+                            progress.setVisible(false);
+                            auth.enableAuth(true);
+                        } catch (Throwable t) {
+                            Launcher.getInstance().getLog().error(t);
+                        }
                     }
                 }).start();
             }

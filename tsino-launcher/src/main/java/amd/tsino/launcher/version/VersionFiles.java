@@ -19,6 +19,7 @@ public class VersionFiles implements ArtifactList {
     private static final String NATIVES_SUFFIX = "-natives-";
     private final Gson gson = new Gson();
     private MinecraftVersion version;
+    private File nativesDir = null;
 
     private String getLatestVersionName() throws IOException {
         URL url = LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.VERSIONS_JSON);
@@ -32,7 +33,7 @@ public class VersionFiles implements ArtifactList {
 
     private void downloadVersionInfo() throws IOException {
         String versionName = getLatestVersionName();
-        String fileName = LauncherConstants.VERSIONS_BASE + versionName + "/" + versionName + ".json";
+        final String fileName = LauncherConstants.VERSIONS_BASE + versionName + "/" + versionName + ".json";
         URL url = new URL(LauncherConstants.BASE_URL + fileName);
         File file = LauncherUtils.getFile(fileName);
         new DownloadJob(file, url).run();
@@ -52,7 +53,7 @@ public class VersionFiles implements ArtifactList {
             for (Library lib : version.getLibraries()) {
                 list.add(lib);
             }
-            final String fileName = LauncherConstants.VERSIONS_BASE + version.getID() + "/" + version.getID() + ".jar";
+            final String fileName = version.getVersionJar();
             list.add(new DownloadJob(LauncherUtils.getFile(fileName), new URL(LauncherConstants.BASE_URL + fileName)));
             return list;
         } catch (IOException e) {
@@ -67,7 +68,7 @@ public class VersionFiles implements ArtifactList {
     }
 
     private void unpackNatives() {
-        File nativesDir = LauncherUtils.getFile(LauncherConstants.VERSIONS_BASE + "/" + version.getID() + "/" + version.getID() + NATIVES_SUFFIX + System.currentTimeMillis() + "/");
+        nativesDir = LauncherUtils.getFile(LauncherConstants.VERSIONS_BASE + "/" + version.getID() + "/" + version.getID() + NATIVES_SUFFIX + System.currentTimeMillis() + "/");
         for (Library lib : version.getLibraries()) {
             if (lib.isNative()) {
                 try {
@@ -90,6 +91,14 @@ public class VersionFiles implements ArtifactList {
                 FileUtils.deleteQuietly(folder);
             }
         }
+    }
+
+    public MinecraftVersion getVersion() {
+        return version;
+    }
+
+    public File getNativesDir() {
+        return nativesDir;
     }
 
     public static class Versions {

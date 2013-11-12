@@ -56,7 +56,7 @@ public class ResourceFiles implements ArtifactList {
                         .getChildNodes().item(0).getNodeValue());
 
                 if (size > 0L) {
-                    final File file = LauncherUtils.getFile("assets/" + key);
+                    final File file = LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE + key);
                     if (etag.length() > 1) {
                         etag = EtagDatabase.formatEtag(etag);
                         if ((file.isFile()) && (file.length() == size)) {

@@ -46,4 +46,8 @@ public class LauncherVersion {
         modFiles.cleanModFolders();
         versionFiles.extractNatives();
     }
+
+    public VersionFiles getVersionFiles() {
+        return versionFiles;
+    }
 }

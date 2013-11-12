@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 public class LauncherConstants {
     // versions
     public static final String LAUNCHER_VERSION = "1.0.0 (amd 2013)";
+    public static final String LAUNCHER_TITLE = "TSiNO Minecraft Launcher " + LAUNCHER_VERSION;
     public static final int VERSION_NUMERIC = 17;
     // download config
     public static final int DOWNLOAD_THREADS = 13;
@@ -17,6 +18,7 @@ public class LauncherConstants {
     public static final String CONFIG_ZIP = "config.zip";
     public static final String RCPACK_ZIP = "rcpack.zip";
     public static final String RESOURCES_XML = "assets.xml";
+    public static final String RESOURCES_BASE = "assets/";
     public static final String MODS_BASE = "mods/";
     public static final String MODS_JSON = "mods.json";
     public static final String VERSIONS_BASE = "versions/";
