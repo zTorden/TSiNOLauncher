@@ -12,6 +12,9 @@ public class LauncherConstants {
     public static final int DOWNLOAD_THREADS = 13;
     public static final int DOWNLOAD_RETRIES = 3;
     public static final int DOWNLOAD_TIMEOUT = 17000;
+    // jvm args
+    public static final String JVM_ARGS_32BIT = "-Xmx512M";
+    public static final String JVM_ARGS_64BIT = "-Xmx1G";
     // files
     public static final String AUTH_JSON = "launcher_profiles.json";
     public static final String STYLE_ZIP = "style.zip";

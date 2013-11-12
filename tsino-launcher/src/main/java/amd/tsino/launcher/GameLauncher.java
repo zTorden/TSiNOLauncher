@@ -51,6 +51,12 @@ public class GameLauncher {
         }
     }
 
+    private static void addJvmArgs(Java java) {
+        Commandline.Argument jvmArgs = java.createJvmarg();
+        boolean is32Bit = "32".equals(System.getProperty("sun.arch.data.model"));
+        jvmArgs.setLine(is32Bit ? LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT);
+    }
+
     public static void launchGame(VersionFiles version, String sessionID) throws Exception {
         Project project = new Project();
         project.setBaseDir(Launcher.getInstance().getWorkDir());
@@ -70,9 +76,7 @@ public class GameLauncher {
             javaTask.setFailonerror(true);
             javaTask.setClassname(version.getVersion().getMainClass());
 
-            Commandline.Argument jvmArgs = javaTask.createJvmarg();
-            jvmArgs.setLine("-Xms512m -Xmx512m");
-
+            addJvmArgs(javaTask);
             addClientArgs(javaTask, version.getVersion(), sessionID);
 
             Path classPath = new Path(project);
