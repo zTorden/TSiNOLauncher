@@ -23,7 +23,7 @@ public class LauncherFrame {
 
         frame.setVisible(false);
         frame.setTitle(LauncherConstants.LAUNCHER_TITLE);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         String text = ((JTextArea) ((JScrollPane) frame.getContentPane().getComponent(0)).getViewport().getComponent(0)).getText();
         Launcher.getInstance().getLog().setBootstrapLog(text);
         frame.getContentPane().removeAll();
