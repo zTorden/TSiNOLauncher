@@ -16,7 +16,8 @@ import java.util.Set;
 public class ModFiles implements ArtifactList {
     private ModList modList;
 
-    void downloadList() throws IOException {
+
+    public void downloadList() throws IOException {
         File modsJson = LauncherUtils.getFile(LauncherConstants.MODS_JSON);
         new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_BASE + LauncherConstants.MODS_JSON)).run();
         Reader reader = new InputStreamReader(new FileInputStream(modsJson), LauncherConstants.DEFAULT_CHARSET);

@@ -3,6 +3,7 @@ package amd.tsino.launcher.version;
 import amd.tsino.launcher.download.Downloadable;
 import net.minecraft.launcher.Launcher;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,8 @@ public class LauncherVersion {
     private final ModFiles modFiles = new ModFiles();
     private final CustomFiles customFiles = new CustomFiles();
 
-    void addArtifacts(ArtifactList artifactList) {
+    void addArtifacts(ArtifactList artifactList) throws IOException {
+        artifactList.downloadList();
         List<? extends Downloadable> list = artifactList.getArtifacts();
         if (list == null || list.size() == 0) {
             logNoFiles(artifactList);
@@ -22,7 +24,7 @@ public class LauncherVersion {
         artifacts.addAll(list);
     }
 
-    public void updateArtifactLists() {
+    public void updateArtifactLists() throws IOException {
         artifacts.clear();
         addArtifacts(modFiles);
         addArtifacts(versionFiles);

@@ -125,7 +125,7 @@ public class Library implements Downloadable {
                                     .getProperty("os.version"));
                             if (!matcher.matches())
                                 return false;
-                        } catch (Throwable t) {
+                        } catch (Exception t) {
                             Launcher.getInstance().getLog().error(t);
                         }
                     }

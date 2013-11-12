@@ -11,6 +11,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,20 +47,24 @@ public class VersionFiles implements ArtifactList {
     }
 
     @Override
+    public void downloadList() throws IOException {
+        downloadVersionInfo();
+    }
+
+    @Override
     public List<Downloadable> getArtifacts() {
-        try {
-            downloadVersionInfo();
-            ArrayList<Downloadable> list = new ArrayList<>();
-            for (Library lib : version.getLibraries()) {
-                list.add(lib);
-            }
-            final String fileName = version.getVersionJar();
-            list.add(new DownloadJob(LauncherUtils.getFile(fileName), new URL(LauncherConstants.BASE_URL + fileName)));
-            return list;
-        } catch (IOException e) {
-            Launcher.getInstance().getLog().error(e);
+        ArrayList<Downloadable> list = new ArrayList<>();
+        for (Library lib : version.getLibraries()) {
+            list.add(lib);
         }
-        return new ArrayList<>();
+        try {
+            final String name = version.getVersionJar();
+            URL url = new URL(LauncherConstants.BASE_URL + name);
+            list.add(new DownloadJob(LauncherUtils.getFile(name), url));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
     }
 
     public void extractNatives() {

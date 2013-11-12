@@ -40,13 +40,9 @@ class MainPanel extends ImagePanel {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            Launcher.getInstance().launch();
-                            progress.setVisible(false);
-                            auth.enableAuth(true);
-                        } catch (Throwable t) {
-                            Launcher.getInstance().getLog().error(t);
-                        }
+                        Launcher.getInstance().launch();
+                        progress.setVisible(false);
+                        auth.enableAuth(true);
                     }
                 }).start();
             }

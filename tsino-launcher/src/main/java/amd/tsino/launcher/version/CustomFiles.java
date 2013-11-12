@@ -18,6 +18,10 @@ public class CustomFiles implements ArtifactList {
     private final Downloadable rcpackZip = new DownloadJob(LauncherUtils.getFile(LauncherConstants.RCPACK_ZIP), LauncherConstants.RCPACK_URL);
 
     @Override
+    public void downloadList() throws IOException {
+    }
+
+    @Override
     public List<Downloadable> getArtifacts() {
         return Arrays.asList(configZip, rcpackZip);
     }

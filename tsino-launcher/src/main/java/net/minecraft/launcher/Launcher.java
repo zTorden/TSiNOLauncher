@@ -7,6 +7,7 @@ import amd.tsino.launcher.auth.AuthenticationData;
 import amd.tsino.launcher.auth.AuthenticationException;
 import amd.tsino.launcher.auth.InvalidCredentialsException;
 import amd.tsino.launcher.auth.UpdateLauncherException;
+import amd.tsino.launcher.download.DownloadJob;
 import amd.tsino.launcher.download.DownloadManager;
 import amd.tsino.launcher.download.Downloader;
 import amd.tsino.launcher.style.LauncherStyle;
@@ -90,18 +91,33 @@ public class Launcher {
             }
         } catch (IOException e) {
             log.error(e);
-            return;
+            if (frame.showOfflineNotice() != 0) {
+                return;
+            }
         }
 
-        downloads.reset();
-        log.log("Starting downloads...");
         LauncherVersion v = new LauncherVersion();
-        v.updateArtifactLists();
-        v.downloadArtifacts();
-        downloads.waitFinish();
-        Downloader.saveDatabase();
+        try {
+            downloads.reset();
+            log.log("Starting downloads...");
+            v.updateArtifactLists();
+            v.downloadArtifacts();
+            downloads.waitFinish();
+            Downloader.saveDatabase();
 
-        if (downloads.getFailed() > 0) {
+            if (downloads.getFailed() > 0) {
+                StringBuilder line = new StringBuilder();
+                line.append('[');
+                for (DownloadJob job : downloads.getFailedJobs()) {
+                    line.append(job.getFile().getName());
+                    line.append(',');
+                }
+                if (line.length() > 0) line.deleteCharAt(line.length() - 1);
+                line.append(']');
+                throw new Exception("Download failed: " + line);
+            }
+        } catch (Exception e) {
+            log.error(e);
             frame.showDownloadFailedNotice();
             return;
         }
