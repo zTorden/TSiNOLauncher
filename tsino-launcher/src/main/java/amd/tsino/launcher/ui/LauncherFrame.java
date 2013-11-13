@@ -15,10 +15,9 @@ public class LauncherFrame {
     public LauncherFrame(JFrame frame) throws IOException {
         this.frame = frame;
 
-        SetSystemLookAndFeel();
+        setSystemLookAndFeel();
 
-        mainPanel = new MainPanel(Launcher.getInstance().getStyle()
-                .getMainPanelStyle());
+        mainPanel = new MainPanel(Launcher.getInstance().getStyle().getMainPanelStyle());
         mainPanel.setVisible(true);
 
         frame.setVisible(false);
@@ -28,19 +27,36 @@ public class LauncherFrame {
         Launcher.getInstance().getLog().setBootstrapLog(text);
         frame.getContentPane().removeAll();
         frame.setBackground(Color.DARK_GRAY);
-        frame.add(mainPanel);
-        frame.setResizable(false);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+        frame.add(mainPanel, BorderLayout.CENTER);
         frame.getRootPane().setDefaultButton(mainPanel.getAuth().getEnter());
+
+        frame.setSize(mainPanel.getPreferredSize());
+        safeSleep(50);
+        frame.setResizable(false);
+        safeSleep(50);
+        frame.pack();
+        safeSleep(50);
+        frame.setLocationRelativeTo(null);
+        safeSleep(50);
         frame.setVisible(true);
     }
 
-    private static void SetSystemLookAndFeel() {
+    private static void setSystemLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             Launcher.getInstance().getLog().error(e);
+        }
+    }
+
+    private static void safeSleep(long l) {
+        while (true) {
+            try {
+                Thread.sleep(l);
+                break;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

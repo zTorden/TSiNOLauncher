@@ -99,6 +99,21 @@ public class Library implements Downloadable {
         return allowed;
     }
 
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Library && name.equals(((Library) obj).name);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Library {name = %s}", name);
+    }
+
     public static class Rule {
         private final String action;
         private final OS os;

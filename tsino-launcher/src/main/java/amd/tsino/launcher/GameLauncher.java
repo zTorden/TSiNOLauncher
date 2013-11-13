@@ -80,7 +80,6 @@ public class GameLauncher {
             addClientArgs(javaTask, version.getVersion(), sessionID);
 
             Path classPath = new Path(project);
-            classPath.setPath(LauncherUtils.getFile(version.getVersion().getVersionJar()).getAbsolutePath());
             for (Library lib : version.getVersion().getLibraries()) {
                 if (!lib.isNative()) {
                     Path libPath = new Path(project);
@@ -88,6 +87,9 @@ public class GameLauncher {
                     classPath.append(libPath);
                 }
             }
+            Path jarPath = new Path(project);
+            jarPath.setPath(LauncherUtils.getFile(version.getVersion().getVersionJar()).getAbsolutePath());
+            classPath.append(jarPath);
             javaTask.setClasspath(classPath);
 
             Environment.Variable variable = new Environment.Variable();

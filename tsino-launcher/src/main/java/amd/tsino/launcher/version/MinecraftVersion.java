@@ -25,6 +25,9 @@ public class MinecraftVersion {
     public List<Library> getLibraries() {
         List<Library> libs = new ArrayList<>();
         for (Library lib : libraries) {
+            if (libs.contains(lib)) {
+                libs.remove(lib);
+            }
             if (lib.isAllowed()) {
                 libs.add(lib);
             }

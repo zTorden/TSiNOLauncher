@@ -13,7 +13,7 @@ class ErrorPanel extends JPanel {
         final JTextArea area = new JTextArea();
         area.setEditable(false);
         area.setFocusable(true);
-        area.setFont(new Font("Monospaced", 0, 10));
+        area.setFont(new Font("Monospaced", 0, 12));
         area.setText(Launcher.getInstance().getLog().getDump());
 
         setTextPopupMenu(area);

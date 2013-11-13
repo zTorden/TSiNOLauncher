@@ -5,6 +5,7 @@ import net.minecraft.launcher.Launcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class LauncherVersion {
@@ -16,7 +17,7 @@ public class LauncherVersion {
 
     void addArtifacts(ArtifactList artifactList) throws IOException {
         artifactList.downloadList();
-        List<? extends Downloadable> list = artifactList.getArtifacts();
+        Collection<? extends Downloadable> list = artifactList.getArtifacts();
         if (list == null || list.size() == 0) {
             logNoFiles(artifactList);
             return;
