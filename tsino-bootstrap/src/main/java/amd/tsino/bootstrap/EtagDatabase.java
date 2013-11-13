@@ -144,7 +144,7 @@ public class EtagDatabase {
 			if (file.isFile()) {
 				db = gson.fromJson(FileUtils.readFileToString(file), Map.class);
 			}
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			Bootstrap.getInstance().error(ex);
 		}
 		return db;
@@ -164,7 +164,7 @@ public class EtagDatabase {
 		File file = new File(Bootstrap.getInstance().getWorkingDir(), name);
 		try {
 			FileUtils.writeStringToFile(file, gson.toJson(db));
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			Bootstrap.getInstance().error(ex);
 		}
 	}
