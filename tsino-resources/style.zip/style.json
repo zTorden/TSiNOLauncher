@@ -13,12 +13,12 @@
       "x": 23,
       "y": 20,
       "padding": {
-        "top": 5,
+        "top": 4,
         "bottom": 5,
         "left": 60,
         "right": 6
       },
-      "font": "Sans",
+      "font": "Verdana",
       "size": 18,
       "color": "#6a6a6a",
       "tooltip": null,
@@ -29,12 +29,12 @@
       "x": 23,
       "y": 60,
       "padding": {
-        "top": 5,
+        "top": 4,
         "bottom": 5,
         "left": 60,
         "right": 6
       },
-      "font": "Sans",
+      "font": "Verdana",
       "size": 18,
       "color": "#6a6a6a",
       "tooltip": null,
