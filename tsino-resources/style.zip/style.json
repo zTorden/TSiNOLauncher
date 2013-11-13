@@ -1,0 +1,110 @@
+{
+  "background": "background.png",
+  "header": {
+    "x": 37,
+    "y": 18,
+    "background": "header.png"
+  },
+  "auth": {
+    "x": 13,
+    "y": 100,
+    "background": "auth.png",
+    "login": {
+      "x": 23,
+      "y": 20,
+      "padding": {
+        "top": 5,
+        "bottom": 5,
+        "left": 60,
+        "right": 6
+      },
+      "font": "Sans",
+      "size": 18,
+      "color": "#6a6a6a",
+      "tooltip": null,
+      "normal": "login.png",
+      "hover": "login.png"
+    },
+    "password": {
+      "x": 23,
+      "y": 60,
+      "padding": {
+        "top": 5,
+        "bottom": 5,
+        "left": 60,
+        "right": 6
+      },
+      "font": "Sans",
+      "size": 18,
+      "color": "#6a6a6a",
+      "tooltip": null,
+      "normal": "password.png",
+      "hover": "password.png"
+    },
+    "check": {
+      "x": 39,
+      "y": 103,
+      "tooltip": "Запомнить пароль",
+      "true_normal": "check_true.png",
+      "true_hover": "check_true_click.png",
+      "true_click": "check_true_click.png",
+      "false_normal": "check_false.png",
+      "false_hover": "check_false_click.png",
+      "false_click": "check_false_click.png"
+    },
+    "enter": {
+      "x": 84,
+      "y": 103,
+      "tooltip": "Войти в игру",
+      "normal": "enter.png",
+      "hover": "enter_hover.png",
+      "click": "enter_click.png"
+    },
+    "register": {
+      "x": 143,
+      "y": 103,
+      "tooltip": "Зарегистрироваться",
+      "normal": "reg.png",
+      "hover": "reg_hover.png",
+      "click": "reg_click.png"
+    },
+    "error": {
+      "x": 14,
+      "y": 142,
+      "background": "login_error.png"
+    },
+    "browser": {
+      "x": 39,
+      "y": 180,
+      "w": 195,
+      "h": 250,
+      "url": "http://www.guimp.com"
+    }
+  },
+  "news": {
+    "x": 297,
+    "y": 97,
+    "background": "news.png",
+    "browser": {
+      "x": 23,
+      "y": 79,
+      "w": 440,
+      "h": 365,
+      "url": "http://forestry.sengir.net/files"
+    }
+  },
+  "progress": {
+    "x": 14,
+    "y": 571,
+    "padding": {
+        "top": 1,
+        "bottom": 0,
+        "left": 5,
+        "right": 3
+    },
+    "background": "progress_bg.png",
+    "start": "progress_start.png",
+    "end": "progress_end.png",
+    "body": "progress_body.png"
+  }
+}
