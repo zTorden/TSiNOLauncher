@@ -101,12 +101,13 @@ public class LauncherFrame {
                 "Offline", JOptionPane.YES_NO_OPTION);
     }
 
-    public void showDownloadFailedNotice() {
+    public int showDownloadFailedNotice() {
         String message = "<html>Извините, не удалось скачать все необходимые файлы." +
                 "<br>Проверьте Ваше интернет-соединение." +
+                "<br><br>Всё равно попытаться запустить игру?" +
                 "<br><br>Журнал событий:</html>";
-        JOptionPane.showMessageDialog(frame, new ErrorPanel(message),
-                "Download failed", JOptionPane.WARNING_MESSAGE);
+        return JOptionPane.showConfirmDialog(frame, new ErrorPanel(message),
+                "Download failed", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
     }
 
     public void showLaunchFailedNotice() {
@@ -114,6 +115,6 @@ public class LauncherFrame {
                 "<br>Пожалуйста, перезапустите лаунчер." +
                 "<br><br>Журнал событий:</html>";
         JOptionPane.showMessageDialog(frame, new ErrorPanel(message),
-                "Launch failed", JOptionPane.WARNING_MESSAGE);
+                "Launch failed", JOptionPane.ERROR_MESSAGE);
     }
 }

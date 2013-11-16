@@ -25,7 +25,7 @@ class MainPanel extends ImagePanel {
         Launcher.getInstance().getDownloads().addUpdateListener(new UpdateListener() {
             @Override
             public void updated(DownloadManager manager) {
-                progress.setIndeterminate(manager.getTotal() < 2);
+                progress.setIndeterminate(manager.getTotal() < 1);
                 progress.setMaximum(manager.getTotal());
                 progress.setValue(manager.getFinished() + manager.getFailed());
             }

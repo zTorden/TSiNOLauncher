@@ -19,7 +19,7 @@ public class ModFiles implements ArtifactList {
 
     public void downloadList() throws IOException {
         File modsJson = LauncherUtils.getFile(LauncherConstants.MODS_JSON);
-        new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_BASE + LauncherConstants.MODS_JSON)).run();
+        new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_JSON)).run();
         Reader reader = new InputStreamReader(new FileInputStream(modsJson), LauncherConstants.DEFAULT_CHARSET);
         final Gson gson = new Gson();
         modList = gson.fromJson(reader, ModList.class);

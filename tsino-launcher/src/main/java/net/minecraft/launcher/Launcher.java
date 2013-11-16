@@ -13,7 +13,6 @@ import amd.tsino.launcher.download.Downloader;
 import amd.tsino.launcher.style.LauncherStyle;
 import amd.tsino.launcher.ui.LauncherFrame;
 import amd.tsino.launcher.version.LauncherVersion;
-import amd.tsino.launcher.version.ResourceFiles;
 
 import javax.swing.*;
 import java.io.File;
@@ -44,7 +43,6 @@ public class Launcher {
         style = new LauncherStyle();
         auth = new AuthenticationData();
         downloads = new DownloadManager();
-        downloads.addDownload(new ResourceFiles().downloadJob());
         this.frame = new LauncherFrame(frame);
     }
 
@@ -118,7 +116,9 @@ public class Launcher {
             }
         } catch (Exception e) {
             log.error(e);
-            frame.showDownloadFailedNotice();
+            if (frame.showDownloadFailedNotice() != 0) {
+                return;
+            }
             return;
         }
 

@@ -20,10 +20,10 @@ public class LauncherConstants {
     public static final String STYLE_ZIP = "style.zip";
     public static final String CONFIG_ZIP = "config.zip";
     public static final String RCPACK_ZIP = "rcpack.zip";
-    public static final String RESOURCES_XML = "assets.xml";
     public static final String RESOURCES_BASE = "assets/";
+    public static final String RESOURCES_XML = RESOURCES_BASE + "assets.xml";
     public static final String MODS_BASE = "mods/";
-    public static final String MODS_JSON = "mods.json";
+    public static final String MODS_JSON = MODS_BASE + "mods.json";
     public static final String VERSIONS_BASE = "versions/";
     public static final String VERSIONS_JSON = VERSIONS_BASE + "versions.json";
     public static final String LIBRARIES_BASE = "libraries/";
@@ -32,7 +32,7 @@ public class LauncherConstants {
     public static final String RCPACKS_BASE = "resourcepacks/";
     // urls
     public static final String BASE_URL = "http://tsino.unet.by/minecraft/klient/";
-    public static final String RESOURCES_URL = "https://s3.amazonaws.com/Minecraft.Resources/";
+    //"https://s3.amazonaws.com/Minecraft.Resources/";
     public static final URL STYLE_URL = LauncherUtils.getURL(BASE_URL + STYLE_ZIP);
     public static final URL CONFIG_URL = LauncherUtils.getURL(BASE_URL + "config/" + CONFIG_ZIP);
     public static final URL RCPACK_URL = LauncherUtils.getURL(BASE_URL + RCPACK_ZIP);

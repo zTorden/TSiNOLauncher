@@ -24,16 +24,14 @@ import java.util.List;
 public class ResourceFiles implements ArtifactList {
     private final File resourcesFile = LauncherUtils.getFile(LauncherConstants.RESOURCES_XML);
 
-    public DownloadJob downloadJob() {
-        URL resourcesURL = LauncherUtils.getURL(LauncherConstants.RESOURCES_URL);
+    private DownloadJob downloadJob() {
+        URL resourcesURL = LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.RESOURCES_XML);
         return new DownloadJob(resourcesFile, resourcesURL);
     }
 
     @Override
     public void downloadList() throws IOException {
-        if (!resourcesFile.exists()) {
-            downloadJob().run();
-        }
+        downloadJob().run();
     }
 
     @Override
@@ -71,7 +69,7 @@ public class ResourceFiles implements ArtifactList {
                                 if (localEtag.equals(etag)) continue;
                             }
                         }
-                        final URL url = new URL(LauncherConstants.RESOURCES_URL + key);
+                        final URL url = new URL(LauncherConstants.BASE_URL + LauncherConstants.RESOURCES_BASE + key);
                         result.add(new DownloadJob(file, url));
                     }
                 }
