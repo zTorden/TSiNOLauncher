@@ -50,10 +50,6 @@ public class Launcher {
         return instance;
     }
 
-    private static String quote(String s) {
-        return "'" + s + "'";
-    }
-
     public Proxy getProxy() {
         return proxy;
     }
@@ -119,7 +115,6 @@ public class Launcher {
             if (frame.showDownloadFailedNotice() != 0) {
                 return;
             }
-            return;
         }
 
         log.log("Extracting files...");
