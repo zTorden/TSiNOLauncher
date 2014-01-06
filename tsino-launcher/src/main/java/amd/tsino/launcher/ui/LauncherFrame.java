@@ -31,13 +31,13 @@ public class LauncherFrame {
         frame.getRootPane().setDefaultButton(mainPanel.getAuth().getEnter());
 
         frame.setSize(mainPanel.getPreferredSize());
-        safeSleep(50);
+        LauncherUtils.safeSleep(50);
         frame.setResizable(false);
-        safeSleep(50);
+        LauncherUtils.safeSleep(50);
         frame.pack();
-        safeSleep(50);
+        LauncherUtils.safeSleep(50);
         frame.setLocationRelativeTo(null);
-        safeSleep(50);
+        LauncherUtils.safeSleep(50);
         frame.setVisible(true);
     }
 
@@ -46,17 +46,6 @@ public class LauncherFrame {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             Launcher.getInstance().getLog().error(e);
-        }
-    }
-
-    private static void safeSleep(long l) {
-        while (true) {
-            try {
-                Thread.sleep(l);
-                break;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 

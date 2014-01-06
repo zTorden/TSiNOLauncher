@@ -49,6 +49,7 @@ public class ModFiles implements ArtifactList {
 
     private void clearModFolder() {
         Set<String> mods = new HashSet<>();
+        mods.add("mods.json");
         for (Mod mod : modList.getList()) {
             mods.add(mod.getName());
         }

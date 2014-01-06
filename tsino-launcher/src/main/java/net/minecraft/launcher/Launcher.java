@@ -78,12 +78,7 @@ public class Launcher {
             log.error(e);
             frame.showOutdatedNotice();
             return;
-        } catch (AuthenticationException e) {
-            log.error(e);
-            if (frame.showOfflineNotice() != 0) {
-                return;
-            }
-        } catch (IOException e) {
+        } catch (IOException | AuthenticationException e) {
             log.error(e);
             if (frame.showOfflineNotice() != 0) {
                 return;

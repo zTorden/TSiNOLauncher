@@ -166,4 +166,15 @@ public class LauncherUtils {
             out.write(buffer, 0, count);
         }
     }
+
+    public static void safeSleep(long l) {
+        while (true) {
+            try {
+                Thread.sleep(l);
+                break;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
