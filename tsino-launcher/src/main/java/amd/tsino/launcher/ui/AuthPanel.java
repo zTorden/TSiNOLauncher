@@ -61,7 +61,7 @@ public class AuthPanel extends ImagePanel {
         login.getDocument().addDocumentListener(dl);
         password.getDocument().addDocumentListener(dl);
 
-        setCredentials(Launcher.getInstance().getAuth().getCredentials());
+        setCredentials(Launcher.getInstance().getSettings().getCredentials());
 
         register.addActionListener(new ActionListener() {
             @Override

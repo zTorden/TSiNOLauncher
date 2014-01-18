@@ -5,8 +5,11 @@ import amd.tsino.launcher.download.UpdateListener;
 import amd.tsino.launcher.style.MainPanelStyle;
 import net.minecraft.launcher.Launcher;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
@@ -35,7 +38,7 @@ class MainPanel extends ImagePanel {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 auth.enableAuth(false);
-                Launcher.getInstance().getAuth().setCredentials(auth.getCredentials());
+                Launcher.getInstance().getSettings().setCredentials(auth.getCredentials());
                 progress.setVisible(true);
                 new Thread(new Runnable() {
                     @Override
@@ -45,6 +48,17 @@ class MainPanel extends ImagePanel {
                         auth.enableAuth(true);
                     }
                 }).start();
+            }
+        });
+
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getX() < 16 && e.getY() < 16) {
+                    String args = JOptionPane.showInputDialog("Java Arguments:",
+                            Launcher.getInstance().getSettings().getJavaArgs());
+                    Launcher.getInstance().getSettings().setJavaArgs(args);
+                }
             }
         });
 

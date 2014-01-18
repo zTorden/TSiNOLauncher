@@ -30,7 +30,7 @@ public class GameLauncher {
             switch (arg) {
                 case "${auth_player_name}":
                 case "${auth_username}":
-                    java.createArg().setValue(Launcher.getInstance().getAuth().getCredentials().getUser());
+                    java.createArg().setValue(Launcher.getInstance().getSettings().getCredentials().getUser());
                     break;
                 case "${auth_session}":
                     java.createArg().setValue(sessionID);
@@ -53,8 +53,7 @@ public class GameLauncher {
 
     private static void addJvmArgs(Java java) {
         Commandline.Argument jvmArgs = java.createJvmarg();
-        boolean is32Bit = "32".equals(System.getProperty("sun.arch.data.model"));
-        jvmArgs.setLine(is32Bit ? LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT);
+        jvmArgs.setLine(Launcher.getInstance().getSettings().getJavaArgs());
     }
 
     public static void launchGame(VersionFiles version, String sessionID) throws Exception {

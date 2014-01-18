@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 
 public class LauncherConstants {
     // versions
-    public static final String LAUNCHER_VERSION = "1.0.0 (amd 2013)";
+    public static final String LAUNCHER_VERSION = "1.0.1 (amd 2014)";
     public static final String LAUNCHER_TITLE = "TSiNO Minecraft Launcher " + LAUNCHER_VERSION;
     public static final int VERSION_NUMERIC = 17;
     // download config
@@ -13,8 +13,8 @@ public class LauncherConstants {
     public static final int DOWNLOAD_RETRIES = 3;
     public static final int DOWNLOAD_TIMEOUT = 17000;
     // jvm args
-    public static final String JVM_ARGS_32BIT = "-Xmx512M";
-    public static final String JVM_ARGS_64BIT = "-Xmx1G";
+    public static final String JVM_ARGS_32BIT = "-Xmx1G";
+    public static final String JVM_ARGS_64BIT = "-Xmx2G";
     // files
     public static final String AUTH_JSON = "launcher_profiles.json";
     public static final String STYLE_ZIP = "style.zip";

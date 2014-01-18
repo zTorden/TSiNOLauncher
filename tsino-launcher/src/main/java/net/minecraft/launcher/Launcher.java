@@ -3,6 +3,7 @@ package net.minecraft.launcher;
 import amd.tsino.launcher.GameLauncher;
 import amd.tsino.launcher.LauncherConstants;
 import amd.tsino.launcher.LauncherLog;
+import amd.tsino.launcher.LauncherSettings;
 import amd.tsino.launcher.auth.AuthenticationData;
 import amd.tsino.launcher.auth.AuthenticationException;
 import amd.tsino.launcher.auth.InvalidCredentialsException;
@@ -25,9 +26,9 @@ public class Launcher {
     private File workDir;
     private Proxy proxy;
     private LauncherLog log;
-    private AuthenticationData auth;
     private LauncherStyle style;
     private DownloadManager downloads;
+    private LauncherSettings settings;
 
     public Launcher(JFrame frame, File workDir, Proxy proxy,
                     Integer version) throws IOException {
@@ -41,7 +42,7 @@ public class Launcher {
         log.log("Launcher version %s started...",
                 LauncherConstants.LAUNCHER_VERSION);
         style = new LauncherStyle();
-        auth = new AuthenticationData();
+        settings = new LauncherSettings();
         downloads = new DownloadManager();
         this.frame = new LauncherFrame(frame);
     }
@@ -69,8 +70,8 @@ public class Launcher {
     public void launch() {
         String sessionID = "null";
         try {
-            sessionID = auth.requestSessionID();
-            auth.save();
+            sessionID = AuthenticationData.requestSessionID();
+            settings.save();
         } catch (InvalidCredentialsException e) {
             frame.showLoginError();
             return;
@@ -127,8 +128,8 @@ public class Launcher {
         System.exit(0);
     }
 
-    public AuthenticationData getAuth() {
-        return auth;
+    public LauncherSettings getSettings() {
+        return settings;
     }
 
     public DownloadManager getDownloads() {

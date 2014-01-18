@@ -1,24 +1,21 @@
 package amd.tsino.launcher.auth;
 
 public class Credentials {
-    private final String selectedProfile;
+    private final String user;
     private final String password;
     private final boolean remember;
 
-    public Credentials() {
-        selectedProfile = "";
-        password = "";
-        remember = true;
-    }
-
     public Credentials(String user, String password, boolean remember) {
-        this.selectedProfile = user;
-        this.password = password;
+        if (user != null) this.user = user;
+        else this.user = "";
+        if (password != null) this.password = password;
+        else this.password = "";
         this.remember = remember;
     }
 
     public String getUser() {
-        return selectedProfile;
+
+        return user;
     }
 
     public String getPassword() {
