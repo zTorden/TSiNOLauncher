@@ -20,6 +20,8 @@ public class LauncherSettings {
         private String password;
         private boolean remember = true;
         private String javaArgs;
+        private boolean disableOptiFine;
+        private boolean showOnClose;
     }
 
     public void load() {
@@ -77,5 +79,21 @@ public class LauncherSettings {
         } else {
             settings.javaArgs = args;
         }
+    }
+
+    public boolean getDisableOptiFine() {
+        return settings.disableOptiFine;
+    }
+
+    public void setDisableOptiFine(boolean disable) {
+        settings.disableOptiFine = disable;
+    }
+
+    public boolean getShowOnClose() {
+        return settings.showOnClose;
+    }
+
+    public void setShowOnClose(boolean showOnClose) {
+        settings.showOnClose = showOnClose;
     }
 }

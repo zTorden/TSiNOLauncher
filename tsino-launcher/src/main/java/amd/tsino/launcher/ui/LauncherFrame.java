@@ -58,6 +58,15 @@ public class LauncherFrame {
         });
     }
 
+    public void show() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                frame.setVisible(true);
+            }
+        });
+    }
+
     public void showLoginError() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

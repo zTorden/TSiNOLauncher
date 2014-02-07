@@ -125,7 +125,12 @@ public class Launcher {
             log.error(e);
             frame.showLaunchFailedNotice();
         }
-        System.exit(0);
+
+        if (settings.getShowOnClose()) {
+            frame.show();
+        } else {
+            System.exit(0);
+        }
     }
 
     public LauncherSettings getSettings() {

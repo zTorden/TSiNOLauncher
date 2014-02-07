@@ -55,9 +55,13 @@ class MainPanel extends ImagePanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getX() < 16 && e.getY() < 16) {
-                    String args = JOptionPane.showInputDialog("Java Arguments:",
-                            Launcher.getInstance().getSettings().getJavaArgs());
-                    Launcher.getInstance().getSettings().setJavaArgs(args);
+                    SettingsPanel settingsPanel = new SettingsPanel();
+                    int result = JOptionPane.showOptionDialog(MainPanel.this, settingsPanel, "Настройки", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, JOptionPane.OK_OPTION);
+                    if (result == JOptionPane.OK_OPTION) {
+                        Launcher.getInstance().getSettings().setJavaArgs(settingsPanel.getJavaArgs());
+                        Launcher.getInstance().getSettings().setShowOnClose(settingsPanel.getShowOnClose());
+                        Launcher.getInstance().getSettings().setDisableOptiFine(settingsPanel.getDisableOptiFine());
+                    }
                 }
             }
         });

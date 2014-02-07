@@ -16,7 +16,6 @@ import java.util.Set;
 public class ModFiles implements ArtifactList {
     private ModList modList;
 
-
     public void downloadList() throws IOException {
         File modsJson = LauncherUtils.getFile(LauncherConstants.MODS_JSON);
         new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_JSON)).run();
@@ -77,6 +76,14 @@ public class ModFiles implements ArtifactList {
         }
 
         public List<Mod> getList() {
+            if (Launcher.getInstance().getSettings().getDisableOptiFine()) {
+                for (int i = 0; i < mods.size(); i++) {
+                    if (mods.get(i).getName().contains("OptiFine")) {
+                        mods.remove(i);
+                        break;
+                    }
+                }
+            }
             return mods;
         }
     }
