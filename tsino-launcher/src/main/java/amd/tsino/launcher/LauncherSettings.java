@@ -62,8 +62,11 @@ public class LauncherSettings {
     }
 
     public static String defaultJavaArgs() {
-        boolean is32Bit = "32".equals(System.getProperty("sun.arch.data.model"));
-        return is32Bit ? LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT;
+    	String args=("32".equals(System.getProperty("sun.arch.data.model")))?LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT;
+        String version[]=System.getProperty("java.version").split("\\.");
+        String versionParams=LauncherConstants.JVM_ARGS_VERSION.get(System.getProperty("java.version"));
+        if(versionParams==null) versionParams=LauncherConstants.JVM_ARGS_VERSION.get(version[0]+"."+version[1]);
+        return versionParams==null? args : args+" "+versionParams;
     }
 
     public String getJavaArgs() {

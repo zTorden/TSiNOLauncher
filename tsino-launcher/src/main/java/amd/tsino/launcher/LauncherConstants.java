@@ -2,6 +2,8 @@ package amd.tsino.launcher;
 
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LauncherConstants {
     // versions
@@ -15,6 +17,11 @@ public class LauncherConstants {
     // jvm args
     public static final String JVM_ARGS_32BIT = "-Xmx1G";
     public static final String JVM_ARGS_64BIT = "-Xmx2G";
+    public static final Map<String,String> JVM_ARGS_VERSION; 
+    static {
+      JVM_ARGS_VERSION= new HashMap<String,String>();
+      JVM_ARGS_VERSION.put("1.7","-XX:MaxPermSize=128M");
+    }    
     // files
     public static final String AUTH_JSON = "launcher_profiles.json";
     public static final String STYLE_ZIP = "style.zip";
