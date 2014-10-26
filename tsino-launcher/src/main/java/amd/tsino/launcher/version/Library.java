@@ -57,7 +57,7 @@ public class Library implements Downloadable {
         sb.append(parts[2]);
         if (isNative()) {
             sb.append("-");
-            sb.append(natives.get(LauncherUtils.getOperatingSystem()));
+            sb.append(natives.get(LauncherUtils.getOperatingSystem()).replace("${arch}",System.getProperty("sun.arch.data.model")));
         }
         sb.append(".jar");
         return sb.toString();
