@@ -69,8 +69,11 @@ public class Launcher {
 
     public void launch() {
         String sessionID = "null";
+        String uniqueID = "null";
         try {
-            sessionID = AuthenticationData.requestSessionID();
+	    String s = AuthenticationData.requestSessionString();
+            sessionID = s.split(":")[3].trim();
+            uniqueID = s.split(":")[1].trim();
             settings.save();
         } catch (InvalidCredentialsException e) {
             frame.showLoginError();
@@ -120,7 +123,7 @@ public class Launcher {
 
         log.log("Starting game...");
         try {
-            GameLauncher.launchGame(v.getVersionFiles(), sessionID);
+            GameLauncher.launchGame(v.getVersionFiles(), sessionID, uniqueID);
         } catch (Exception e) {
             log.error(e);
             frame.showLaunchFailedNotice();

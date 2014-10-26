@@ -57,7 +57,7 @@ public class AuthenticationData {
         return null;
     }
 
-    public static String requestSessionID() throws AuthenticationException {
+    public static String requestSessionString() throws AuthenticationException {
         Credentials crd = Launcher.getInstance().getSettings().getCredentials();
         Map<String, Object> query = new HashMap<>();
         query.put("user", crd.getUser());
@@ -82,7 +82,6 @@ public class AuthenticationData {
             throw new AuthenticationException(result);
         }
 
-        String[] values = result.split(":");
-        return values[3].trim();
+        return result;
     }
 }
