@@ -46,8 +46,23 @@ public class ModFiles implements ArtifactList {
         FileUtils.deleteQuietly(coreModDir);
     }
 
+    private void clearModFolderRecursively(Set<String> mods, String path, File modsDir){
+            File[] files = modsDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+		    if (file.isFile() && !mods.contains(path+file.getName())) {
+                        Launcher.getInstance().getLog().log(
+                                "Removing mod: %s", file.toString());
+                        FileUtils.deleteQuietly(file);
+		    } else if (file.isDirectory())
+			clearModFolderRecursively(mods,path+file.getName()+"/",file);
+            }
+	    }
+    }
+    
     private void clearModFolder() {
-        Set<String> mods = new HashSet<>();
+
+	Set<String> mods = new HashSet<>();
         mods.add("mods.json");
         for (Mod mod : modList.getList()) {
             mods.add(mod.getName());
@@ -55,16 +70,7 @@ public class ModFiles implements ArtifactList {
 
         File modsDir = LauncherUtils.getFile(LauncherConstants.MODS_BASE);
         if (modsDir.exists()) {
-            File[] files = modsDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile() && !mods.contains(file.getName())) {
-                        Launcher.getInstance().getLog().log(
-                                "Removing mod: %s", file.toString());
-                        FileUtils.deleteQuietly(file);
-                    }
-                }
-            }
+	    clearModFolderRecursively(mods,"",modsDir);
         }
     }
 
