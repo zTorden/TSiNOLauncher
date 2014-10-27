@@ -26,6 +26,7 @@ public class LauncherConstants {
     public static final String AUTH_JSON = "launcher_profiles.json";
     public static final String STYLE_ZIP = "style.zip";
     public static final String CONFIG_ZIP = "config.zip";
+    public static final String RESOURCES_ZIP = "assets.zip"; 
     public static final String RCPACK_ZIP = "rcpack.zip";
     public static final String RESOURCES_BASE = "assets/";
     public static final String RESOURCES_XML = RESOURCES_BASE + "assets.xml";
@@ -41,7 +42,8 @@ public class LauncherConstants {
     public static final String BASE_URL = "http://tsino.unet.by/minecraft/klient/";
     //"https://s3.amazonaws.com/Minecraft.Resources/";
     public static final URL STYLE_URL = LauncherUtils.getURL(BASE_URL + STYLE_ZIP);
-    public static final URL CONFIG_URL = LauncherUtils.getURL(BASE_URL + "config/" + CONFIG_ZIP);
+    public static final URL CONFIG_URL = LauncherUtils.getURL(BASE_URL + CONFIG_BASE + CONFIG_ZIP);
+    public static final URL RESOURCES_URL = LauncherUtils.getURL(BASE_URL + RESOURCES_BASE + RESOURCES_ZIP);
     public static final URL RCPACK_URL = LauncherUtils.getURL(BASE_URL + RCPACK_ZIP);
     public static final URL AUTH_URL = LauncherUtils.getURL("http://tsino.unet.by/minecraft/auth.php");
     public static final URL REGISTER_URL = LauncherUtils.getURL("http://tsino.unet.by/forum/register.php");
