@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class LauncherConstants {
     // versions
-    public static final String LAUNCHER_VERSION = "1.0.1 (amd 2014)";
+    public static final String LAUNCHER_VERSION = "1.1.1 (Torden 2014) (amd 2014)";
     public static final String LAUNCHER_TITLE = "TSiNO Minecraft Launcher " + LAUNCHER_VERSION;
-    public static final int VERSION_NUMERIC = 17;
+    public static final int VERSION_NUMERIC = 18;
     // download config
     public static final int DOWNLOAD_THREADS = 13;
     public static final int DOWNLOAD_RETRIES = 3;
