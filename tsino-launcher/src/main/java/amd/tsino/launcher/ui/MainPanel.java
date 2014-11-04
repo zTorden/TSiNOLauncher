@@ -60,7 +60,8 @@ class MainPanel extends ImagePanel {
                     if (result == JOptionPane.OK_OPTION) {
                         Launcher.getInstance().getSettings().setJavaArgs(settingsPanel.getJavaArgs());
                         Launcher.getInstance().getSettings().setShowOnClose(settingsPanel.getShowOnClose());
-                        Launcher.getInstance().getSettings().setDisableOptiFine(settingsPanel.getDisableOptiFine());
+                        for(String mod:Launcher.getInstance().getSettings().getDisabledMods().keySet())
+                        	Launcher.getInstance().getSettings().setModDisabled(mod,settingsPanel.isModDisabled(mod));
                     }
                 }
             }

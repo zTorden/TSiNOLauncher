@@ -2,11 +2,15 @@ package amd.tsino.launcher;
 
 import amd.tsino.launcher.auth.AuthenticationData;
 import amd.tsino.launcher.auth.Credentials;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import net.minecraft.launcher.Launcher;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LauncherSettings {
     private Settings settings;
@@ -20,7 +24,11 @@ public class LauncherSettings {
         private String password;
         private boolean remember = true;
         private String javaArgs;
-        private boolean disableOptiFine;
+        private Map<String,Boolean> disableMods=new HashMap<>();
+        {
+        	disableMods.put("Optifine", false);
+        	disableMods.put("BetterFonts", false);
+        }
         private boolean showOnClose;
     }
 
@@ -84,12 +92,12 @@ public class LauncherSettings {
         }
     }
 
-    public boolean getDisableOptiFine() {
-        return settings.disableOptiFine;
+    public Map<String,Boolean> getDisabledMods() {
+        return new HashMap<>(settings.disableMods);
     }
 
-    public void setDisableOptiFine(boolean disable) {
-        settings.disableOptiFine = disable;
+    public void setModDisabled(String name,boolean enabled) {
+        settings.disableMods.put(name, enabled);
     }
 
     public boolean getShowOnClose() {
