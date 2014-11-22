@@ -28,12 +28,12 @@ public class CustomFiles implements ArtifactList {
 
     public void extractFiles() {
         try {
-            LauncherUtils.unzip(configZip.getFile(), LauncherUtils.getFile(LauncherConstants.CONFIG_BASE), null);
+            LauncherUtils.unzipWithoutReplace(configZip.getFile(), LauncherUtils.getFile(LauncherConstants.CONFIG_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }
         try {
-            LauncherUtils.unzip(rcpackZip.getFile(), LauncherUtils.getFile(LauncherConstants.RCPACKS_BASE), null);
+            LauncherUtils.unzipWithoutReplace(rcpackZip.getFile(), LauncherUtils.getFile(LauncherConstants.RCPACKS_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }

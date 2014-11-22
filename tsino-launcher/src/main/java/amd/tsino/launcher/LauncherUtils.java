@@ -10,7 +10,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class LauncherUtils {
-    public static void openLink(URL link) {
+
+	public static void openLink(URL link) {
         try {
             Class<?> desktopClass = Class.forName("java.awt.Desktop");
             Object o = desktopClass.getMethod("getDesktop", new Class[0]).invoke(
@@ -125,6 +126,14 @@ public class LauncherUtils {
     }
 
     public static void unzip(File zip, File dir, List<String> exclude) throws IOException {
+    	unzip(zip, dir, exclude, true);
+    }
+    
+    public static void unzipWithoutReplace(File zip, File dir, List<String> exclude) throws IOException {
+    	unzip(zip, dir, exclude, false);
+    }
+    
+    private static void unzip(File zip, File dir, List<String> exclude, boolean replaceExisting) throws IOException {
         LauncherUtils.createDir(dir);
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
             ZipEntry ze = zis.getNextEntry();
@@ -141,17 +150,23 @@ public class LauncherUtils {
                 }
                 if (extract) {
                     File newFile = new File(dir, fileName);
-                    Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
                     if (ze.isDirectory()) {
+                        Launcher.getInstance().getLog().log("Creating directory: %s", newFile.getAbsolutePath());
                         LauncherUtils.createDir(newFile);
                     } else {
-                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                            int len;
-                            byte[] buffer = new byte[4096];
-                            while ((len = zis.read(buffer)) > 0) {
-                                fos.write(buffer, 0, len);
-                            }
-                        }
+                    	if(newFile.exists()&&!replaceExisting)
+                            Launcher.getInstance().getLog().log("Skipping unzip: file %s exists.", newFile.getAbsolutePath());
+                    	else
+                    	{
+                            Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
+	                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+	                            int len;
+	                            byte[] buffer = new byte[4096];
+	                            while ((len = zis.read(buffer)) > 0) {
+	                                fos.write(buffer, 0, len);
+	                            }
+	                        }
+                    	}
                     }
                 }
                 ze = zis.getNextEntry();

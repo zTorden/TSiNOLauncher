@@ -24,7 +24,7 @@ public class ResourceFiles implements ArtifactList {
     
     public void extractResources(){
         try {
-            LauncherUtils.unzip(resourcesZip.getFile(), LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE), null);
+            LauncherUtils.unzipWithoutReplace(resourcesZip.getFile(), LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }
