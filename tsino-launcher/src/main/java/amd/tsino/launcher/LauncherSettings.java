@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LauncherSettings {
+	
     private Settings settings;
 
     public LauncherSettings() {
@@ -24,12 +25,18 @@ public class LauncherSettings {
         private String password;
         private boolean remember = true;
         private String javaArgs;
-        private Map<String,Boolean> disableMods=new HashMap<>();
-        {
-        	disableMods.put("Optifine", false);
-        	disableMods.put("BetterFonts", false);
-        }
+        private Map<String,Boolean> disableMods;
         private boolean showOnClose;
+               
+        private void postLoad(){
+			if(disableMods==null) disableMods=new HashMap<>();
+        	if(disableMods.get("Optifine")==null) disableMods.put("Optifine", false);
+        	if(disableMods.get("BetterFonts")==null) disableMods.put("BetterFonts", false);
+        }
+        
+        private Settings(){
+        	postLoad();
+        }
     }
 
     public void load() {
@@ -38,6 +45,7 @@ public class LauncherSettings {
                     LauncherConstants.DEFAULT_CHARSET);
             final Gson gson = new Gson();
             settings = gson.fromJson(reader, LauncherSettings.Settings.class);
+            settings.postLoad();
             reader.close();
             return;
         } catch (FileNotFoundException e) {
