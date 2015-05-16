@@ -81,6 +81,9 @@ public class AuthenticationData {
             }
             throw new AuthenticationException(result);
         }
+        
+        else if(Integer.parseInt(result.split(":")[0].trim())!=Launcher.getInstance().getBootstrapVersion())
+                throw new UpdateLauncherException("Нужно обновить лаунчер!");
 
         return result;
     }
