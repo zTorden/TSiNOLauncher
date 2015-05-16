@@ -11,7 +11,7 @@ import amd.tsino.launcher.download.DownloadJob;
 import amd.tsino.launcher.download.Downloadable;
 
 public class ResourceFiles implements ArtifactList {
-    private final Downloadable resourcesZip = new DownloadJob(LauncherUtils.getFile(LauncherConstants.RESOURCES_ZIP), LauncherConstants.RESOURCES_URL);
+    private final Downloadable resourcesZip = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.RESOURCES_ZIP), Launcher.getInstance().getSettings().getServer().getResourcesUrl());
 
     @Override
     public void downloadList() throws IOException {
@@ -24,7 +24,7 @@ public class ResourceFiles implements ArtifactList {
     
     public void extractResources(){
         try {
-            LauncherUtils.unzipWithoutReplace(resourcesZip.getFile(), LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE), null);
+            LauncherUtils.unzipWithoutReplace(resourcesZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RESOURCES_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }

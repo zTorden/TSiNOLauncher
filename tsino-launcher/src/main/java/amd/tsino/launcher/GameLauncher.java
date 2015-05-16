@@ -41,11 +41,11 @@ public class GameLauncher {
                     java.createArg().setValue(version.getID());
                     break;
                 case "${game_directory}":
-                    java.createArg().setFile(Launcher.getInstance().getWorkDir());
+                    java.createArg().setFile(LauncherUtils.getClientFile(""));
                     break;
                 case "${assets_root}":
                 case "${game_assets}":
-                    java.createArg().setFile(LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE));
+                    java.createArg().setFile(LauncherUtils.getClientFile(LauncherConstants.RESOURCES_BASE));
                     break;
                 case "${auth_uuid}":
                     java.createArg().setValue(uniqueID);
@@ -99,7 +99,7 @@ public class GameLauncher {
                 }
             }
             Path jarPath = new Path(project);
-            jarPath.setPath(LauncherUtils.getFile(version.getVersion().getVersionJar()).getAbsolutePath());
+            jarPath.setPath(LauncherUtils.getClientFile(version.getVersion().getVersionJar()).getAbsolutePath());
             classPath.append(jarPath);
             javaTask.setClasspath(classPath);
 

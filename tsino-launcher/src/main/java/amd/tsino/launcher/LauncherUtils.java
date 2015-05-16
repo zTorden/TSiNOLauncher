@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import static amd.tsino.launcher.LauncherConstants.FS;
+import static amd.tsino.launcher.LauncherConstants.LAUNCHER_DIRECTORY;
 
 public class LauncherUtils {
 
@@ -121,8 +123,16 @@ public class LauncherUtils {
         }
     }
 
-    public static File getFile(String name) {
-        return new File(Launcher.getInstance().getWorkDir(), name);
+    public static File getLauncherFile(String name) {
+        return new File(Launcher.getInstance().getWorkDir()+FS+LAUNCHER_DIRECTORY, name);
+    }
+
+    public static File getClientFile(String name) {
+    	String clientDirectory=Launcher.getInstance().getSettings().getServer().getDirectory();
+    	if(clientDirectory.isEmpty())
+    		return new File(Launcher.getInstance().getWorkDir(), name);
+    	else
+    		return new File(Launcher.getInstance().getWorkDir()+FS+clientDirectory, name);
     }
 
     public static void unzip(File zip, File dir, List<String> exclude) throws IOException {

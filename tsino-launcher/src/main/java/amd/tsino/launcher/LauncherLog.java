@@ -24,7 +24,7 @@ public class LauncherLog {
         
         PrintStream log=null;
         try {
-            log = new PrintStream (new File(Launcher.getInstance().getWorkDir(),"launcher.log"));
+            log = new PrintStream (LauncherUtils.getLauncherFile("launcher.log"));
         } catch (FileNotFoundException e) {
 	    System.out.println("Could not create launcher.log");
 	} finally {

@@ -83,9 +83,9 @@ public class LauncherFrame {
         int result = JOptionPane.showOptionDialog(frame, error,
                 "Outdated launcher", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
                 LauncherConstants.UPDATE_BUTTONS,
-                LauncherConstants.UPDATE_BUTTONS[1]);
+                LauncherConstants.UPDATE_BUTTONS[0]);
 
-        if (result < LauncherConstants.UPDATE_URLS.length - 1) {
+        if (result < LauncherConstants.UPDATE_URLS.length) {
             LauncherUtils.openLink(LauncherConstants.UPDATE_URLS[result]);
         }
     }

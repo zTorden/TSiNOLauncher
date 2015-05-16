@@ -13,13 +13,16 @@ import java.util.Locale;
 import javax.swing.JFrame;
 
 public class Bootstrap implements Runnable {
-	public static final int BOOTSTRAP_VERSION = 5;
-	public static final URL LAUNCHER_URL = Util
-			.constantURL("http://tsino.unet.by/minecraft/klient/launcher.jar");
+	public static final int BOOTSTRAP_VERSION = 6;
+	public static final URL LAUNCHER_URL = Util.constantURL("http://tsino.unet.by/minecraft/klient/launcher.jar");
+	public static final String LAUNCHER_DIR = ".tsino_launcher";
+	public static final String OLD_LAUNCHER_DIR = ".tsino_minecraft";
 	public static final String LAUNCHER_FILE_NAME = "launcher.jar";
 	private static Bootstrap instance = null;
 	private Proxy proxy = Proxy.NO_PROXY;
-	private File workingDir = Util.getDefaultWorkingDir();
+	private File baseDir = Util.getBaseDir();
+	private File launcherDir = new File(baseDir,LAUNCHER_DIR);
+	private File oldLauncherDir = new File(baseDir,OLD_LAUNCHER_DIR);
 	private BootstrapFrame frame = new BootstrapFrame();
 
 	public static Bootstrap getInstance() {
@@ -44,26 +47,51 @@ public class Bootstrap implements Runnable {
 	public Proxy getProxy() {
 		return proxy;
 	}
-
-	public File getWorkingDir() {
-		return workingDir;
+	
+	public File getBaseDir(){
+		return baseDir;
 	}
 
+	public File getLauncherDir(){
+		return launcherDir;
+	}
+
+	public File getOldLauncherDir(){
+		return oldLauncherDir;
+	}
+	
 	private void launch() throws Exception {
 		proxy = ProxySelector.getDefault().select(LAUNCHER_URL.toURI()).get(0);
+		
 
-		if ((workingDir.exists()) && (!workingDir.isDirectory())) {
-			error("Invalid working directory: %s", workingDir.toString());
+		if ((launcherDir.exists()) && (!launcherDir.isDirectory())) {
+			error("Invalid launcher directory: %s", launcherDir.toString());
 			throw new BootstrapException("Invalid working directory");
 		}
 
-		if ((!workingDir.exists()) && (!workingDir.mkdirs())) {
-			error("Unable to create directory: %s", workingDir.toString());
+		if ((!launcherDir.exists()) && (!launcherDir.mkdirs())) {
+			error("Unable to create directory: %s", launcherDir.toString());
 			throw new BootstrapException("Unable to create directory");
 		}
-
+		
 		printSystemInfo();
-		File launcherFile = new File(workingDir, LAUNCHER_FILE_NAME);
+
+		File oldEtag = new File(oldLauncherDir,EtagDatabase.ETAGS_FILENAME);
+		File newEtag = new File(launcherDir,EtagDatabase.ETAGS_FILENAME);
+		File oldHashes = new File(oldLauncherDir,EtagDatabase.HASHES_FILENAME);
+		File newHashes = new File(launcherDir,EtagDatabase.HASHES_FILENAME);
+		
+		if(newEtag.exists())
+			log("%s exists",EtagDatabase.ETAGS_FILENAME);
+		else if(oldEtag.exists())
+			log("%s moved: %b",EtagDatabase.ETAGS_FILENAME, oldEtag.renameTo(newEtag));
+
+		if(newHashes.exists())
+			log("%s exists",EtagDatabase.HASHES_FILENAME);
+		else if(oldHashes.exists())
+			log("%s moved: %b",EtagDatabase.HASHES_FILENAME, oldHashes.renameTo(newHashes));
+
+		File launcherFile = new File(launcherDir, LAUNCHER_FILE_NAME);
 		new Downloader(LAUNCHER_URL, launcherFile).download(3);
 		EtagDatabase.getInstance().saveDatabase();
 		startLauncher(launcherFile);
@@ -116,7 +144,7 @@ public class Bootstrap implements Runnable {
 					.loadClass("net.minecraft.launcher.Launcher");
 			Constructor<?> constructor = aClass.getConstructor(new Class[] {
 					JFrame.class, File.class, Proxy.class, Integer.class });
-			constructor.newInstance(new Object[] { this.frame, this.workingDir,
+			constructor.newInstance(new Object[] { this.frame, Util.getBaseDir(),
 					this.proxy, BOOTSTRAP_VERSION });
 		} catch (Exception e) {
 			throw new BootstrapException("Unable to start: "

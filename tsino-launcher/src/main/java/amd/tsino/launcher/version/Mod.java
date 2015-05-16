@@ -26,7 +26,7 @@ public class Mod implements Downloadable {
     public URL getURL() {
         try {
             if (url == null) {
-                url = LauncherConstants.BASE_URL + LauncherConstants.MODS_BASE;
+                url = Launcher.getInstance().getSettings().getServer().getClientPath() + LauncherConstants.MODS_BASE;
             }
             if (url.charAt(url.length() - 1) != '/') {
                 url += '/';
@@ -40,6 +40,6 @@ public class Mod implements Downloadable {
 
     @Override
     public File getFile() {
-        return LauncherUtils.getFile(LauncherConstants.MODS_BASE + getName());
+        return LauncherUtils.getClientFile(LauncherConstants.MODS_BASE + getName());
     }
 }

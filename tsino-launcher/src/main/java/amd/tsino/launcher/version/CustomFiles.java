@@ -2,6 +2,7 @@ package amd.tsino.launcher.version;
 
 import amd.tsino.launcher.LauncherConstants;
 import amd.tsino.launcher.LauncherUtils;
+import amd.tsino.launcher.ServerInfo;
 import amd.tsino.launcher.download.DownloadJob;
 import amd.tsino.launcher.download.Downloadable;
 import net.minecraft.launcher.Launcher;
@@ -14,8 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CustomFiles implements ArtifactList {
-    private final Downloadable configZip = new DownloadJob(LauncherUtils.getFile(LauncherConstants.CONFIG_ZIP), LauncherConstants.CONFIG_URL);
-    private final Downloadable rcpackZip = new DownloadJob(LauncherUtils.getFile(LauncherConstants.RCPACK_ZIP), LauncherConstants.RCPACK_URL);
+	private final ServerInfo server=Launcher.getInstance().getSettings().getServer();
+    private final Downloadable configZip = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.CONFIG_ZIP), server.getConfigUrl());
+    private final Downloadable rcpackZip = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.RCPACK_ZIP), server.getRcpackUrl());
 
     @Override
     public void downloadList() throws IOException {
@@ -28,18 +30,18 @@ public class CustomFiles implements ArtifactList {
 
     public void extractFiles() {
         try {
-            LauncherUtils.unzipWithoutReplace(configZip.getFile(), LauncherUtils.getFile(LauncherConstants.CONFIG_BASE), null);
+            LauncherUtils.unzipWithoutReplace(configZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.CONFIG_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }
         try {
-            LauncherUtils.unzipWithoutReplace(rcpackZip.getFile(), LauncherUtils.getFile(LauncherConstants.RCPACKS_BASE), null);
+            LauncherUtils.unzipWithoutReplace(rcpackZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RCPACKS_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }
         try {
             String name = "servers.dat";
-            File file = LauncherUtils.getFile(name);
+            File file = LauncherUtils.getClientFile(name);
             if (!file.exists()) {
                 try (InputStream in = getClass().getResourceAsStream("/" + name)) {
                     try (FileOutputStream out = new FileOutputStream(file)) {

@@ -21,8 +21,8 @@ public class ModFiles implements ArtifactList {
     private ModList modList;
 
     public void downloadList() throws IOException {
-        File modsJson = LauncherUtils.getFile(LauncherConstants.MODS_JSON);
-        new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_JSON)).run();
+        File modsJson = LauncherUtils.getClientFile(LauncherConstants.MODS_JSON);
+        new DownloadJob(modsJson, LauncherUtils.getURL(Launcher.getInstance().getSettings().getServer().getClientPath() + LauncherConstants.MODS_JSON)).run();
         Reader reader = new InputStreamReader(new FileInputStream(modsJson), LauncherConstants.DEFAULT_CHARSET);
         final Gson gson = new Gson();
         modList = gson.fromJson(reader, ModList.class);
@@ -46,7 +46,7 @@ public class ModFiles implements ArtifactList {
     }
 
     private void clearCoreModFolder() {
-        File coreModDir = LauncherUtils.getFile(LauncherConstants.COREMODS_BASE);
+        File coreModDir = LauncherUtils.getClientFile(LauncherConstants.COREMODS_BASE);
         FileUtils.deleteQuietly(coreModDir);
     }
 
@@ -72,7 +72,7 @@ public class ModFiles implements ArtifactList {
             mods.add(mod.getName());
         }
 
-        File modsDir = LauncherUtils.getFile(LauncherConstants.MODS_BASE);
+        File modsDir = LauncherUtils.getClientFile(LauncherConstants.MODS_BASE);
         if (modsDir.exists()) {
 	    clearModFolderRecursively(mods,"",modsDir);
         }

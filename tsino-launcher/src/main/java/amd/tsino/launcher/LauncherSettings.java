@@ -15,7 +15,9 @@ import java.util.Map;
 public class LauncherSettings {
 	
     private Settings settings;
+    private ServerInfo server;
 
+    
     public LauncherSettings() {
         load();
     }
@@ -64,7 +66,7 @@ public class LauncherSettings {
     }
 
     private static File getFile() {
-        return LauncherUtils.getFile(LauncherConstants.AUTH_JSON);
+        return LauncherUtils.getLauncherFile(LauncherConstants.AUTH_JSON);
     }
 
     public Credentials getCredentials() {
@@ -115,4 +117,13 @@ public class LauncherSettings {
     public void setShowOnClose(boolean showOnClose) {
         settings.showOnClose = showOnClose;
     }
+
+	public void setServer(ServerInfo server) {
+		this.server=server;
+		
+	}
+	
+	public ServerInfo getServer(){
+		return server;
+	}
 }

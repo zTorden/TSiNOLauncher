@@ -13,7 +13,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 public class Util {
-	private static final String DIRECTORY = "tsino_minecraft";
 
 	public static URL constantURL(String input) {
 		try {
@@ -23,7 +22,7 @@ public class Util {
 		}
 	}
 
-	public static File getDefaultWorkingDir() {
+	public static File getBaseDir() {
 		String path = System.getProperty("user.home", ".");
 		String osName = System.getProperty("os.name").toLowerCase();
 
@@ -33,10 +32,10 @@ public class Util {
 				path = applicationData;
 			}
 		} else if (osName.contains("mac")) {
-			return new File(path, "Library/Application Support/" + DIRECTORY);
+			return new File(path, "Library/Application Support/");
 		}
 
-		return new File(path, "." + DIRECTORY);
+		return new File(path);
 	}
 
 	public static String performPost(URL url, String parameters, Proxy proxy,

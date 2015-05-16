@@ -9,6 +9,7 @@ import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 
+@SuppressWarnings("serial")
 public class SettingsPanel extends JPanel {
     private Map<String,JCheckBox> modBoxes=new HashMap<>(); 
     private JCheckBox showBox;

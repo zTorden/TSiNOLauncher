@@ -23,8 +23,8 @@ public class VersionFiles implements ArtifactList {
     private File nativesDir = null;
 
     private String getLatestVersionName() throws IOException {
-        URL url = LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.VERSIONS_JSON);
-        File file = LauncherUtils.getFile(LauncherConstants.VERSIONS_JSON);
+        URL url = LauncherUtils.getURL(Launcher.getInstance().getSettings().getServer().getClientPath() + LauncherConstants.VERSIONS_JSON);
+        File file = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_JSON);
         new DownloadJob(file, url).run();
         Reader reader = new InputStreamReader(new FileInputStream(file), LauncherConstants.DEFAULT_CHARSET);
         Versions versions = gson.fromJson(reader, Versions.class);
@@ -35,8 +35,8 @@ public class VersionFiles implements ArtifactList {
     private void downloadVersionInfo() throws IOException {
         String versionName = getLatestVersionName();
         final String fileName = LauncherConstants.VERSIONS_BASE + versionName + "/" + versionName + ".json";
-        URL url = new URL(LauncherConstants.BASE_URL + fileName);
-        File file = LauncherUtils.getFile(fileName);
+        URL url = new URL(Launcher.getInstance().getSettings().getServer().getClientPath() + fileName);
+        File file = LauncherUtils.getClientFile(fileName);
         new DownloadJob(file, url).run();
         Reader reader = new InputStreamReader(new FileInputStream(file), LauncherConstants.DEFAULT_CHARSET);
         version = gson.fromJson(reader, MinecraftVersion.class);
@@ -59,8 +59,8 @@ public class VersionFiles implements ArtifactList {
         }
         try {
             final String name = version.getVersionJar();
-            URL url = new URL(LauncherConstants.BASE_URL + name);
-            list.add(new DownloadJob(LauncherUtils.getFile(name), url));
+            URL url = new URL(Launcher.getInstance().getSettings().getServer().getClientPath() + name);
+            list.add(new DownloadJob(LauncherUtils.getClientFile(name), url));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -73,7 +73,7 @@ public class VersionFiles implements ArtifactList {
     }
 
     private void unpackNatives() {
-        nativesDir = LauncherUtils.getFile(LauncherConstants.VERSIONS_BASE + "/" + version.getID() + "/" + version.getID() + NATIVES_SUFFIX + System.currentTimeMillis() + "/");
+        nativesDir = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_BASE + "/" + version.getID() + "/" + version.getID() + NATIVES_SUFFIX + System.currentTimeMillis() + "/");
         for (Library lib : version.getLibraries()) {
             if (lib.isNative()) {
                 try {
@@ -86,7 +86,7 @@ public class VersionFiles implements ArtifactList {
     }
 
     private void cleanOldNatives() {
-        File root = LauncherUtils.getFile(LauncherConstants.VERSIONS_BASE);
+        File root = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_BASE);
         Launcher.getInstance().getLog().log("Looking for old natives to clean up...");
 
         for (File version : root
