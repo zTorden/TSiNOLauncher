@@ -39,6 +39,7 @@ public class LauncherConstants {
     public static final String CONFIG_ZIP = "config.zip";
     public static final String RESOURCES_ZIP = "assets.zip"; 
     public static final String RCPACK_ZIP = "rcpack.zip";
+    public static final String SERVERS_DAT = "servers.dat";
     public static final String RESOURCES_BASE = "assets/";
     public static final String RESOURCES_XML = RESOURCES_BASE + "assets.xml";
     public static final String MODS_BASE = "mods/";
