@@ -26,7 +26,7 @@ public class LauncherConstants {
     }
     //Server info
     static {
-    	ServerInfo.addServer("Server 1", "http://tsino.unet.by/minecraft/klient/", ".tsino_minecraft");
+    	ServerInfo.addServer("Server 1", "http://tsino.unet.by/minecraft/klient/client1/", ".tsino_minecraft");
         ServerInfo.addServer("Server 2", "http://tsino.unet.by/minecraft/klient/client2/", ".tsino_minecraft2");
     }
     
