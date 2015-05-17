@@ -2,15 +2,22 @@ package amd.tsino.launcher;
 
 import amd.tsino.launcher.auth.AuthenticationData;
 import amd.tsino.launcher.auth.Credentials;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import net.minecraft.launcher.Launcher;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LauncherSettings {
+	
     private Settings settings;
+    private ServerInfo server;
 
+    
     public LauncherSettings() {
         load();
     }
@@ -20,8 +27,18 @@ public class LauncherSettings {
         private String password;
         private boolean remember = true;
         private String javaArgs;
-        private boolean disableOptiFine;
+        private Map<String,Boolean> disableMods;
         private boolean showOnClose;
+               
+        private void postLoad(){
+			if(disableMods==null) disableMods=new HashMap<>();
+        	if(disableMods.get("Optifine")==null) disableMods.put("Optifine", false);
+        	if(disableMods.get("BetterFonts")==null) disableMods.put("BetterFonts", false);
+        }
+        
+        private Settings(){
+        	postLoad();
+        }
     }
 
     public void load() {
@@ -30,6 +47,7 @@ public class LauncherSettings {
                     LauncherConstants.DEFAULT_CHARSET);
             final Gson gson = new Gson();
             settings = gson.fromJson(reader, LauncherSettings.Settings.class);
+            settings.postLoad();
             reader.close();
             return;
         } catch (FileNotFoundException e) {
@@ -48,7 +66,7 @@ public class LauncherSettings {
     }
 
     private static File getFile() {
-        return LauncherUtils.getFile(LauncherConstants.AUTH_JSON);
+        return LauncherUtils.getLauncherFile(LauncherConstants.AUTH_JSON);
     }
 
     public Credentials getCredentials() {
@@ -62,8 +80,11 @@ public class LauncherSettings {
     }
 
     public static String defaultJavaArgs() {
-        boolean is32Bit = "32".equals(System.getProperty("sun.arch.data.model"));
-        return is32Bit ? LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT;
+    	String args=("32".equals(System.getProperty("sun.arch.data.model")))?LauncherConstants.JVM_ARGS_32BIT : LauncherConstants.JVM_ARGS_64BIT;
+        String version[]=System.getProperty("java.version").split("\\.");
+        String versionParams=LauncherConstants.JVM_ARGS_VERSION.get(System.getProperty("java.version"));
+        if(versionParams==null) versionParams=LauncherConstants.JVM_ARGS_VERSION.get(version[0]+"."+version[1]);
+        return versionParams==null? args : args+" "+versionParams;
     }
 
     public String getJavaArgs() {
@@ -81,12 +102,12 @@ public class LauncherSettings {
         }
     }
 
-    public boolean getDisableOptiFine() {
-        return settings.disableOptiFine;
+    public Map<String,Boolean> getDisabledMods() {
+        return new HashMap<>(settings.disableMods);
     }
 
-    public void setDisableOptiFine(boolean disable) {
-        settings.disableOptiFine = disable;
+    public void setModDisabled(String name,boolean enabled) {
+        settings.disableMods.put(name, enabled);
     }
 
     public boolean getShowOnClose() {
@@ -96,4 +117,13 @@ public class LauncherSettings {
     public void setShowOnClose(boolean showOnClose) {
         settings.showOnClose = showOnClose;
     }
+
+	public void setServer(ServerInfo server) {
+		this.server=server;
+		
+	}
+	
+	public ServerInfo getServer(){
+		return server;
+	}
 }

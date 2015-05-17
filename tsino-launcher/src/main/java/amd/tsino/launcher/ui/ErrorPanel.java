@@ -6,8 +6,10 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.DefaultEditorKit;
+
 import java.awt.*;
 
+@SuppressWarnings("serial")
 class ErrorPanel extends JPanel {
     public ErrorPanel(String message) {
         final JTextArea area = new JTextArea();

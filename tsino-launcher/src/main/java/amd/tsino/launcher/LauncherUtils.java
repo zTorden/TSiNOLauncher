@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import static amd.tsino.launcher.LauncherConstants.FS;
+import static amd.tsino.launcher.LauncherConstants.LAUNCHER_DIRECTORY;
 
 public class LauncherUtils {
-    public static void openLink(URL link) {
+
+	public static void openLink(URL link) {
         try {
             Class<?> desktopClass = Class.forName("java.awt.Desktop");
             Object o = desktopClass.getMethod("getDesktop", new Class[0]).invoke(
@@ -120,11 +123,27 @@ public class LauncherUtils {
         }
     }
 
-    public static File getFile(String name) {
-        return new File(Launcher.getInstance().getWorkDir(), name);
+    public static File getLauncherFile(String name) {
+        return new File(Launcher.getInstance().getWorkDir()+FS+LAUNCHER_DIRECTORY, name);
+    }
+
+    public static File getClientFile(String name) {
+    	String clientDirectory=Launcher.getInstance().getSettings().getServer().getDirectory();
+    	if(clientDirectory.isEmpty())
+    		return new File(Launcher.getInstance().getWorkDir(), name);
+    	else
+    		return new File(Launcher.getInstance().getWorkDir()+FS+clientDirectory, name);
     }
 
     public static void unzip(File zip, File dir, List<String> exclude) throws IOException {
+    	unzip(zip, dir, exclude, true);
+    }
+    
+    public static void unzipWithoutReplace(File zip, File dir, List<String> exclude) throws IOException {
+    	unzip(zip, dir, exclude, false);
+    }
+    
+    private static void unzip(File zip, File dir, List<String> exclude, boolean replaceExisting) throws IOException {
         LauncherUtils.createDir(dir);
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
             ZipEntry ze = zis.getNextEntry();
@@ -141,17 +160,23 @@ public class LauncherUtils {
                 }
                 if (extract) {
                     File newFile = new File(dir, fileName);
-                    Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
                     if (ze.isDirectory()) {
+                        Launcher.getInstance().getLog().log("Creating directory: %s", newFile.getAbsolutePath());
                         LauncherUtils.createDir(newFile);
                     } else {
-                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                            int len;
-                            byte[] buffer = new byte[4096];
-                            while ((len = zis.read(buffer)) > 0) {
-                                fos.write(buffer, 0, len);
-                            }
-                        }
+                    	if(newFile.exists()&&!replaceExisting)
+                            Launcher.getInstance().getLog().log("Skipping unzip: file %s exists.", newFile.getAbsolutePath());
+                    	else
+                    	{
+                            Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());
+	                        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+	                            int len;
+	                            byte[] buffer = new byte[4096];
+	                            while ((len = zis.read(buffer)) > 0) {
+	                                fos.write(buffer, 0, len);
+	                            }
+	                        }
+                    	}
                     }
                 }
                 ze = zis.getNextEntry();

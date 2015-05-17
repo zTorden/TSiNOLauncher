@@ -3,22 +3,26 @@ package amd.tsino.launcher.version;
 import amd.tsino.launcher.LauncherConstants;
 import amd.tsino.launcher.LauncherUtils;
 import amd.tsino.launcher.download.DownloadJob;
+
 import com.google.gson.Gson;
+
 import net.minecraft.launcher.Launcher;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ModFiles implements ArtifactList {
     private ModList modList;
 
     public void downloadList() throws IOException {
-        File modsJson = LauncherUtils.getFile(LauncherConstants.MODS_JSON);
-        new DownloadJob(modsJson, LauncherUtils.getURL(LauncherConstants.BASE_URL + LauncherConstants.MODS_JSON)).run();
+        File modsJson = LauncherUtils.getClientFile(LauncherConstants.MODS_JSON);
+        new DownloadJob(modsJson, LauncherUtils.getURL(Launcher.getInstance().getSettings().getServer().getClientPath() + LauncherConstants.MODS_JSON)).run();
         Reader reader = new InputStreamReader(new FileInputStream(modsJson), LauncherConstants.DEFAULT_CHARSET);
         final Gson gson = new Gson();
         modList = gson.fromJson(reader, ModList.class);
@@ -42,29 +46,35 @@ public class ModFiles implements ArtifactList {
     }
 
     private void clearCoreModFolder() {
-        File coreModDir = LauncherUtils.getFile(LauncherConstants.COREMODS_BASE);
+        File coreModDir = LauncherUtils.getClientFile(LauncherConstants.COREMODS_BASE);
         FileUtils.deleteQuietly(coreModDir);
     }
 
+    private void clearModFolderRecursively(Set<String> mods, String path, File modsDir){
+            File[] files = modsDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+		    if (file.isFile() && !mods.contains(path+file.getName())) {
+                        Launcher.getInstance().getLog().log(
+                                "Removing mod: %s", file.toString());
+                        FileUtils.deleteQuietly(file);
+		    } else if (file.isDirectory())
+			clearModFolderRecursively(mods,path+file.getName()+"/",file);
+            }
+	    }
+    }
+    
     private void clearModFolder() {
-        Set<String> mods = new HashSet<>();
+
+	Set<String> mods = new HashSet<>();
         mods.add("mods.json");
         for (Mod mod : modList.getList()) {
             mods.add(mod.getName());
         }
 
-        File modsDir = LauncherUtils.getFile(LauncherConstants.MODS_BASE);
+        File modsDir = LauncherUtils.getClientFile(LauncherConstants.MODS_BASE);
         if (modsDir.exists()) {
-            File[] files = modsDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile() && !mods.contains(file.getName())) {
-                        Launcher.getInstance().getLog().log(
-                                "Removing mod: %s", file.toString());
-                        FileUtils.deleteQuietly(file);
-                    }
-                }
-            }
+	    clearModFolderRecursively(mods,"",modsDir);
         }
     }
 
@@ -76,14 +86,17 @@ public class ModFiles implements ArtifactList {
         }
 
         public List<Mod> getList() {
-            if (Launcher.getInstance().getSettings().getDisableOptiFine()) {
-                for (int i = 0; i < mods.size(); i++) {
-                    if (mods.get(i).getName().contains("OptiFine")) {
-                        mods.remove(i);
-                        break;
-                    }
-                }
-            }
+        	Map<String,Boolean> disabledMods=Launcher.getInstance().getSettings().getDisabledMods();
+        	for(String mod:disabledMods.keySet()){
+	            if (disabledMods.get(mod)) {
+	                for (int i = 0; i < mods.size(); i++) {
+	                    if (mods.get(i).getName().contains(mod)) {
+	                        mods.remove(i);
+	                        break;
+	                    }
+	                }
+	            }
+        	}
             return mods;
         }
     }

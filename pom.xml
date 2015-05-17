@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>amd-tsino</groupId>
-	<version>0.1</version>
+	<version>1.1</version>
 	<artifactId>amd-tsino</artifactId>
 	<name>amd-tsino</name>
 	<packaging>pom</packaging>

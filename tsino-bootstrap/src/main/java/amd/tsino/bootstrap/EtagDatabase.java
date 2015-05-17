@@ -22,8 +22,8 @@ import com.google.gson.GsonBuilder;
 
 public class EtagDatabase {
 	private static EtagDatabase instance;
-	private final static String ETAGS_FILENAME = "etags.json";
-	private final static String HASHES_FILENAME = "hashes.json";
+	public final static String ETAGS_FILENAME = "etags.json";
+	public final static String HASHES_FILENAME = "hashes.json";
 	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private Map<String, String> etags;
 	private Map<String, String> hashes;
@@ -111,11 +111,13 @@ public class EtagDatabase {
 		for (Map.Entry<String, String> entry : hashes.entrySet()) {
 			File file = new File(entry.getKey());
 			if (!file.exists()) {
+				System.out.println("removing hash for"+file);
 				toRemove.add(entry.getKey());
 			}
 		}
 		for (Map.Entry<String, String> entry : etags.entrySet()) {
 			if (!hashes.containsKey(entry.getKey())) {
+				System.out.println("removing etag for"+entry);
 				toRemove.add(entry.getKey());
 			}
 		}
@@ -138,8 +140,9 @@ public class EtagDatabase {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, String> readFile(String name) {
+		
 		Map<String, String> db = null;
-		File file = new File(Bootstrap.getInstance().getWorkingDir(), name);
+		File file = new File(Bootstrap.getInstance().getLauncherDir(), name);
 		try {
 			if (file.isFile()) {
 				db = gson.fromJson(FileUtils.readFileToString(file), Map.class);
@@ -161,7 +164,7 @@ public class EtagDatabase {
 	}
 
 	private void writeFile(String name, Map<String, String> db) {
-		File file = new File(Bootstrap.getInstance().getWorkingDir(), name);
+		File file = new File(Bootstrap.getInstance().getLauncherDir(), name);
 		try {
 			FileUtils.writeStringToFile(file, gson.toJson(db));
 		} catch (Exception ex) {

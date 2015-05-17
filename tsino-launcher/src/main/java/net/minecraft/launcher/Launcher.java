@@ -29,15 +29,19 @@ public class Launcher {
     private LauncherStyle style;
     private DownloadManager downloads;
     private LauncherSettings settings;
+    private String sessionID;
+    private String uniqueID;
+    private Integer bootstrapVersion;
 
     public Launcher(JFrame frame, File workDir, Proxy proxy,
-                    Integer version) throws IOException {
+                    Integer bootstrapVersion) throws IOException {
         if (instance != null) {
             throw new RuntimeException("Should be only one instance");
         }
         instance = this;
         this.workDir = workDir;
         this.proxy = proxy;
+        this.bootstrapVersion=bootstrapVersion;
         log = new LauncherLog();
         log.log("Launcher version %s started...",
                 LauncherConstants.LAUNCHER_VERSION);
@@ -66,26 +70,38 @@ public class Launcher {
     public LauncherStyle getStyle() {
         return style;
     }
+    
+    public Integer getBootstrapVersion() {
+    	return bootstrapVersion;
+    }
 
-    public void launch() {
-        String sessionID = "null";
+    public boolean authenticate(){
+        sessionID = "null";
+        uniqueID = "null";
         try {
-            sessionID = AuthenticationData.requestSessionID();
+	    String s = AuthenticationData.requestSessionString();
+            sessionID = s.split(":")[3].trim();
+            uniqueID = s.split(":")[1].trim();
             settings.save();
         } catch (InvalidCredentialsException e) {
             frame.showLoginError();
-            return;
+            return false;
         } catch (UpdateLauncherException e) {
             log.error(e);
             frame.showOutdatedNotice();
-            return;
+            return false;
         } catch (IOException | AuthenticationException e) {
             log.error(e);
             if (frame.showOfflineNotice() != 0) {
-                return;
+                return false;
             }
         }
+        
+        return true;
 
+    }
+    
+    public void launch() {
         LauncherVersion v = new LauncherVersion();
         try {
             downloads.reset();
@@ -120,7 +136,7 @@ public class Launcher {
 
         log.log("Starting game...");
         try {
-            GameLauncher.launchGame(v.getVersionFiles(), sessionID);
+            GameLauncher.launchGame(v.getVersionFiles(), sessionID, uniqueID);
         } catch (Exception e) {
             log.error(e);
             frame.showLaunchFailedNotice();

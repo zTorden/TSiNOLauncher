@@ -20,7 +20,7 @@ public class LauncherStyle {
     private MainPanelStyle mainPanelStyle;
 
     public LauncherStyle() throws IOException {
-        styleZip = LauncherUtils.getFile(LauncherConstants.STYLE_ZIP);
+        styleZip = LauncherUtils.getLauncherFile(LauncherConstants.STYLE_ZIP);
         new DownloadJob(styleZip, LauncherConstants.STYLE_URL).run();
         Downloader.saveDatabase();
         Reader reader = new InputStreamReader(getFile(STYLE_JSON),

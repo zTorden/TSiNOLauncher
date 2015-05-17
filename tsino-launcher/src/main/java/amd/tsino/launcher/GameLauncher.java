@@ -24,7 +24,7 @@ public class GameLauncher {
         proj.addBuildListener(logger);
     }
 
-    private static void addClientArgs(Java java, MinecraftVersion version, String sessionID) {
+    private static void addClientArgs(Java java, MinecraftVersion version, String sessionID, String uniqueID) {
         String[] args = version.getMinecraftArguments().split(" ");
         for (String arg : args) {
             switch (arg) {
@@ -33,17 +33,29 @@ public class GameLauncher {
                     java.createArg().setValue(Launcher.getInstance().getSettings().getCredentials().getUser());
                     break;
                 case "${auth_session}":
+                case "${auth_access_token}":
                     java.createArg().setValue(sessionID);
                     break;
                 case "${version_name}":
+                case "${assets_index_name}":
                     java.createArg().setValue(version.getID());
                     break;
                 case "${game_directory}":
-                    java.createArg().setFile(Launcher.getInstance().getWorkDir());
+                    java.createArg().setFile(LauncherUtils.getClientFile(""));
                     break;
+                case "${assets_root}":
                 case "${game_assets}":
-                    java.createArg().setFile(LauncherUtils.getFile(LauncherConstants.RESOURCES_BASE));
+                    java.createArg().setFile(LauncherUtils.getClientFile(LauncherConstants.RESOURCES_BASE));
                     break;
+                case "${auth_uuid}":
+                    java.createArg().setValue(uniqueID);
+                    break;
+		case "${user_properties}":
+		    java.createArg().setValue("{}"); 
+		    break;
+		case "${user_type}":
+		    java.createArg().setValue("legacy");
+		    break;
                 default:
                     java.createArg().setValue(arg);
                     break;
@@ -56,7 +68,7 @@ public class GameLauncher {
         jvmArgs.setLine(Launcher.getInstance().getSettings().getJavaArgs());
     }
 
-    public static void launchGame(VersionFiles version, String sessionID) throws Exception {
+    public static void launchGame(VersionFiles version, String sessionID, String uniqueID) throws Exception {
         Project project = new Project();
         project.setBaseDir(Launcher.getInstance().getWorkDir());
         project.init();
@@ -76,7 +88,7 @@ public class GameLauncher {
             javaTask.setClassname(version.getVersion().getMainClass());
 
             addJvmArgs(javaTask);
-            addClientArgs(javaTask, version.getVersion(), sessionID);
+            addClientArgs(javaTask, version.getVersion(), sessionID, uniqueID);
 
             Path classPath = new Path(project);
             for (Library lib : version.getVersion().getLibraries()) {
@@ -87,7 +99,7 @@ public class GameLauncher {
                 }
             }
             Path jarPath = new Path(project);
-            jarPath.setPath(LauncherUtils.getFile(version.getVersion().getVersionJar()).getAbsolutePath());
+            jarPath.setPath(LauncherUtils.getClientFile(version.getVersion().getVersionJar()).getAbsolutePath());
             classPath.append(jarPath);
             javaTask.setClasspath(classPath);
 

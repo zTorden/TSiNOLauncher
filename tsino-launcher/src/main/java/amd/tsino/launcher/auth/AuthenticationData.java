@@ -57,7 +57,7 @@ public class AuthenticationData {
         return null;
     }
 
-    public static String requestSessionID() throws AuthenticationException {
+    public static String requestSessionString() throws AuthenticationException {
         Credentials crd = Launcher.getInstance().getSettings().getCredentials();
         Map<String, Object> query = new HashMap<>();
         query.put("user", crd.getUser());
@@ -81,8 +81,10 @@ public class AuthenticationData {
             }
             throw new AuthenticationException(result);
         }
+        
+        else if(Integer.parseInt(result.split(":")[0].trim())!=Launcher.getInstance().getBootstrapVersion())
+                throw new UpdateLauncherException("Нужно обновить лаунчер!");
 
-        String[] values = result.split(":");
-        return values[3].trim();
+        return result;
     }
 }

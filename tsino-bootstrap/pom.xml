@@ -4,7 +4,7 @@
 
 	<groupId>tsino-bootstrap</groupId>
 	<artifactId>tsino-bootstrap</artifactId>
-	<version>0.1</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -21,11 +21,12 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
-		</dependency>
+		</dependency>	
 	</dependencies>
 
 	<build>
 		<plugins>
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -48,6 +49,52 @@
 					</execution>
 				</executions>
 			</plugin>
+	        <plugin>
+	          <groupId>com.akathist.maven.plugins.launch4j</groupId>
+	          <artifactId>launch4j-maven-plugin</artifactId>
+	          <executions>
+	            <execution>
+	              <id>l4j-clui</id>
+	              <phase>package</phase>
+	              <goals><goal>launch4j</goal></goals>
+	              <configuration>
+	                <headerType>gui</headerType>
+	                <outfile>target/TSiNOLauncher.exe</outfile>
+	                <errTitle>exelauncher</errTitle>
+	                <icon>src/main/launch4j/icon.ico</icon>
+	                <classPath>
+	                  <mainClass>amd.tsino.bootstrap.Program</mainClass>
+	                  <addDependencies>false</addDependencies>
+	                  <preCp>anything</preCp>
+	                </classPath>
+	                <jre>
+	                  <minVersion>1.7.0</minVersion>
+	                </jre>
+	                <versionInfo>
+	                  <fileVersion>${project.version}.0.0</fileVersion>
+	                  <txtFileVersion>txt file version?</txtFileVersion>
+	                  <fileDescription>TSiNOLauncher</fileDescription>
+	                  <copyright>(c)2015 Torden</copyright>
+	                  <productVersion>${project.version}.0.0</productVersion>
+	                  <txtProductVersion>txt product version</txtProductVersion>
+	                  <productName>TSiNOLauncher</productName>
+	                  <internalName>TSiNOLauncher.jar</internalName>
+	                  <originalFilename>TSiNOLauncher.exe</originalFilename>
+	                </versionInfo>
+	              </configuration>
+	            </execution>
+	          </executions>
+	        </plugin>
+						
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

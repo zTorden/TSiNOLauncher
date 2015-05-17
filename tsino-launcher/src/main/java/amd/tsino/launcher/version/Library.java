@@ -57,7 +57,7 @@ public class Library implements Downloadable {
         sb.append(parts[2]);
         if (isNative()) {
             sb.append("-");
-            sb.append(natives.get(LauncherUtils.getOperatingSystem()));
+            sb.append(natives.get(LauncherUtils.getOperatingSystem()).replace("${arch}",System.getProperty("sun.arch.data.model")));
         }
         sb.append(".jar");
         return sb.toString();
@@ -70,7 +70,7 @@ public class Library implements Downloadable {
     @Override
     public URL getURL() {
         if (url == null) {
-            url = LauncherConstants.BASE_URL;
+            url = Launcher.getInstance().getSettings().getServer().getClientPath();
         }
         if (url.charAt(url.length() - 1) != '/') {
             url += '/';
@@ -85,7 +85,7 @@ public class Library implements Downloadable {
 
     @Override
     public File getFile() {
-        return LauncherUtils.getFile(getFileName());
+        return LauncherUtils.getClientFile(getFileName());
     }
 
     public boolean isAllowed() {
