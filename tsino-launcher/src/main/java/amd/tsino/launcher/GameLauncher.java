@@ -70,7 +70,7 @@ public class GameLauncher {
 
     public static void launchGame(VersionFiles version, String sessionID, String uniqueID) throws Exception {
         Project project = new Project();
-        project.setBaseDir(Launcher.getInstance().getWorkDir());
+        project.setBaseDir(LauncherUtils.getClientFile(""));
         project.init();
 
         addLogger(project, System.out);
