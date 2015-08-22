@@ -6,8 +6,10 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 import static amd.tsino.launcher.LauncherConstants.FS;
 import static amd.tsino.launcher.LauncherConstants.LAUNCHER_DIRECTORY;
 
@@ -135,6 +137,19 @@ public class LauncherUtils {
     		return new File(Launcher.getInstance().getWorkDir()+FS+clientDirectory, name);
     }
 
+    public static long getFileCrc(File file) throws IOException {
+    	try(FileInputStream fis=new FileInputStream(file)){
+	    	CRC32 crc=new CRC32();
+	    	byte[] buffer = new byte[4096];
+	    	int len;
+	    	
+	    	while((len=fis.read(buffer))!=-1)
+	    		crc.update(buffer, 0, len);
+	    	fis.close();
+	    	return crc.getValue();
+    	}
+    }
+    
     public static void unzip(File zip, File dir, List<String> exclude) throws IOException {
     	unzip(zip, dir, exclude, true);
     }
@@ -165,7 +180,9 @@ public class LauncherUtils {
                         LauncherUtils.createDir(newFile);
                     } else {
                     	if(newFile.exists()&&!replaceExisting)
-                            Launcher.getInstance().getLog().log("Skipping unzip: file %s exists.", newFile.getAbsolutePath());
+                   			Launcher.getInstance().getLog().log("Skipping unzip: file %s exists.", newFile.getAbsolutePath());
+                    	else if (newFile.exists()&&ze.getCrc()==getFileCrc(newFile))
+                			Launcher.getInstance().getLog().log("Skipping unzip: file %s exists with the same CRC.", newFile.getAbsolutePath());
                     	else
                     	{
                             Launcher.getInstance().getLog().log("File unzip: %s", newFile.getAbsolutePath());

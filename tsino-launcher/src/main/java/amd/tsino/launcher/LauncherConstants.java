@@ -9,7 +9,7 @@ import amd.tsino.launcher.ServerInfo;
 
 public class LauncherConstants {
     // versions
-    public static final String LAUNCHER_VERSION = "1.2.0 (Torden 2015) (amd 2014)";
+    public static final String LAUNCHER_VERSION = "1.2.1 (Torden 2015) (amd 2014)";
     public static final String LAUNCHER_TITLE = "TSiNO Minecraft Launcher " + LAUNCHER_VERSION;
     public static final int VERSION_NUMERIC = 18;
     // download config

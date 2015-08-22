@@ -36,7 +36,7 @@ public class CustomFiles implements ArtifactList {
             Launcher.getInstance().getLog().error(e);
         }
         try {
-            LauncherUtils.unzipWithoutReplace(rcpackZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RCPACKS_BASE), null);
+            LauncherUtils.unzip(rcpackZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RCPACKS_BASE), null);
         } catch (IOException e) {
             Launcher.getInstance().getLog().error(e);
         }
