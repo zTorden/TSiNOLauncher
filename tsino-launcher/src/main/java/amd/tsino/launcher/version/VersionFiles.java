@@ -73,7 +73,6 @@ public class VersionFiles implements ArtifactList {
     }
 
     private void unpackNatives() {
-    	Launcher.getInstance().getLog().log("Unpacking new natives...");    	
         nativesDir = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_BASE + "/" + version.getID() + "/" + version.getID() + NATIVES_SUFFIX + System.currentTimeMillis() + "/");
         for (Library lib : version.getLibraries()) {
             if (lib.isNative()) {
@@ -87,8 +86,8 @@ public class VersionFiles implements ArtifactList {
     }
 
     private void cleanOldNatives() {
-    	Launcher.getInstance().getLog().log("Looking for old natives to clean up...");
-    	File root = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_BASE);
+        File root = LauncherUtils.getClientFile(LauncherConstants.VERSIONS_BASE);
+        Launcher.getInstance().getLog().log("Looking for old natives to clean up...");
 
         for (File version : root
                 .listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {

@@ -48,8 +48,4 @@ public class ServerInfo{
 	public URL getResourcesUrl() {
 		return  LauncherUtils.getURL(clientPath + LauncherConstants.RESOURCES_BASE + LauncherConstants.RESOURCES_ZIP);
 	}
-
-	public URL getServersDatUrl() {
-		return  LauncherUtils.getURL(clientPath + LauncherConstants.SERVERS_DAT);
-	}
 }
