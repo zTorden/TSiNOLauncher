@@ -52,11 +52,7 @@ public class LauncherConstants {
     public static final String RCPACKS_BASE = "resourcepacks/";
     // urls
     public static final String LAUNCHERBASE_URL = "http://tsino.unet.by/minecraft/klient/";
-    //"https://s3.amazonaws.com/Minecraft.Resources/";
     public static final URL STYLE_URL = LauncherUtils.getURL(LAUNCHERBASE_URL + STYLE_ZIP);
-    //public static final URL CONFIG_URL = LauncherUtils.getURL(BASE_URL + CONFIG_BASE + CONFIG_ZIP);
-    //public static final URL RESOURCES_URL = LauncherUtils.getURL(BASE_URL + RESOURCES_BASE + RESOURCES_ZIP);
-    //public static final URL RCPACK_URL = LauncherUtils.getURL(BASE_URL + RCPACK_ZIP);
     public static final URL AUTH_URL = LauncherUtils.getURL("http://tsino.unet.by/minecraft/auth.php");
     public static final URL REGISTER_URL = LauncherUtils.getURL("http://tsino.unet.by/forum/register.php");
     // update buttons
