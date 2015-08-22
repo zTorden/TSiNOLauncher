@@ -18,6 +18,7 @@ public class CustomFiles implements ArtifactList {
 	private final ServerInfo server=Launcher.getInstance().getSettings().getServer();
     private final Downloadable configZip = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.CONFIG_ZIP), server.getConfigUrl());
     private final Downloadable rcpackZip = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.RCPACK_ZIP), server.getRcpackUrl());
+    private final Downloadable serversDat = new DownloadJob(LauncherUtils.getClientFile(LauncherConstants.SERVERS_DAT), server.getServersDatUrl());
 
     @Override
     public void downloadList() throws IOException {
@@ -25,7 +26,7 @@ public class CustomFiles implements ArtifactList {
 
     @Override
     public List<Downloadable> getArtifacts() {
-        return Arrays.asList(configZip, rcpackZip);
+        return Arrays.asList(configZip, rcpackZip, serversDat);
     }
 
     public void extractFiles() {
@@ -35,21 +36,8 @@ public class CustomFiles implements ArtifactList {
             Launcher.getInstance().getLog().error(e);
         }
         try {
-            LauncherUtils.unzipWithoutReplace(rcpackZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RCPACKS_BASE), null);
+            LauncherUtils.unzip(rcpackZip.getFile(), LauncherUtils.getClientFile(LauncherConstants.RCPACKS_BASE), null);
         } catch (IOException e) {
-            Launcher.getInstance().getLog().error(e);
-        }
-        try {
-            String name = "servers.dat";
-            File file = LauncherUtils.getClientFile(name);
-            if (!file.exists()) {
-                try (InputStream in = getClass().getResourceAsStream("/" + name)) {
-                    try (FileOutputStream out = new FileOutputStream(file)) {
-                        LauncherUtils.copyData(in, out);
-                    }
-                }
-            }
-        } catch (Exception e) {
             Launcher.getInstance().getLog().error(e);
         }
     }
